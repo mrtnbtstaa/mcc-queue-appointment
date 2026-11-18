@@ -7,7 +7,7 @@ import '../../../../../../core/widgets/common_adaptive_grid.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
 import 'cubit/students_cubit.dart';
 import 'cubit/students_state.dart';
-import 'widgets/official_access_banner.dart';
+
 import 'widgets/student_record_card.dart';
 import 'widgets/students_filter_section.dart';
 import 'widgets/students_header_stats.dart';
@@ -40,22 +40,26 @@ class RegisteredStudentsPage extends StatelessWidget {
         child: BlocBuilder<StudentsCubit, StudentsState>(
           builder: (context, state) {
             final list = state.filteredStudents;
-            if (state.isLoading && state.students.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state.error != null && state.students.isEmpty) {
-              return Center(child: Text(state.error!));
-            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const OfficialAccessBanner(),
-                16.0.height,
                 StudentsHeaderStats(count: state.students.length),
                 16.0.height,
                 const StudentsFilterSection(),
                 16.0.height,
-                if (list.isEmpty)
+                if (state.isLoading && state.students.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (state.error != null && state.students.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(state.error!),
+                    ),
+                  )
+                else if (list.isEmpty)
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(24),

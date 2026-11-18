@@ -53,23 +53,14 @@ class StudentsFilterSection extends StatelessWidget {
               ],
             ),
             8.0.height,
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildProgramChip(cubit, state, null, 'All'),
-                  for (final course in courses)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: _buildProgramChip(
-                        cubit,
-                        state,
-                        course.value,
-                        course.label,
-                      ),
-                    ),
-                ],
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildProgramChip(cubit, state, null, 'All'),
+                for (final course in courses)
+                  _buildProgramChip(cubit, state, course.value, course.label),
+              ],
             ),
           ],
         );

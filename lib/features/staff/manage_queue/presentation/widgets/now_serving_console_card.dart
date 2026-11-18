@@ -172,6 +172,7 @@ class NowServingConsoleCard extends StatelessWidget {
                 ? null
                 : () => bloc.add(const QueueCallNextRequested()),
           ),
+          12.0.height,
           Row(
             children: [
               Expanded(

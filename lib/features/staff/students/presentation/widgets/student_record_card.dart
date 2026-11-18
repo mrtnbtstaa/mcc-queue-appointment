@@ -14,6 +14,10 @@ class StudentRecordCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = student.isActive;
+    final academicDetails = [
+      if (student.course.isNotEmpty) student.course.toUpperCase(),
+      if (student.yearLevel.isNotEmpty) 'Year ${student.yearLevel}',
+    ].join(' • ');
     return InkWell(
       onTap: () => context.pushNamed(
         AppRoutes.staffStudentDetailName,
@@ -48,20 +52,24 @@ class StudentRecordCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommonText(
-                        text: student.name,
+                        text: student.name.isEmpty
+                            ? 'Unnamed student'
+                            : student.name,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         maxLine: 1,
                         textOverFlow: TextOverflow.ellipsis,
                       ),
                       2.0.height,
-                      CommonText(
-                        text: 'ID: ${student.studentId}',
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        fontColor: TAppColors.textSecondary,
-                      ),
-                      2.0.height,
+                      if (student.studentId.isNotEmpty) ...[
+                        CommonText(
+                          text: 'ID: ${student.studentId}',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          fontColor: TAppColors.textSecondary,
+                        ),
+                        2.0.height,
+                      ],
                       CommonText(
                         text: student.email,
                         fontSize: 11,
@@ -90,19 +98,24 @@ class StudentRecordCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Divider(height: 20),
-            Row(
-              children: [
-                const Icon(Icons.school, size: 12, color: TAppColors.textHint),
-                4.0.width,
-                CommonText(
-                  text:
-                      '${student.course.toUpperCase()} - Year ${student.yearLevel}',
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ],
-            ),
+            if (academicDetails.isNotEmpty) ...[
+              const Divider(height: 20),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.school,
+                    size: 12,
+                    color: TAppColors.textHint,
+                  ),
+                  4.0.width,
+                  CommonText(
+                    text: academicDetails,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

@@ -13,8 +13,14 @@ class StudentsCubit extends Cubit<StudentsState> {
 
   StudentsCubit(this.getUsers) : super(const StudentsState());
 
-  Future<void> loadStudents() async {
-    emit(state.copyWith(isLoading: true, clearError: true));
+  Future<void> loadStudents({bool clearStudents = false}) async {
+    emit(
+      state.copyWith(
+        isLoading: true,
+        clearError: true,
+        students: clearStudents ? const [] : null,
+      ),
+    );
     final query = state.searchQuery.trim();
     final course = state.selectedCourse;
     final requestId = ++_requestId;
@@ -78,14 +84,17 @@ class StudentsCubit extends Cubit<StudentsState> {
     if (query == state.searchQuery) return;
     emit(state.copyWith(searchQuery: query));
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 400), loadStudents);
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 400),
+      () => loadStudents(clearStudents: true),
+    );
   }
 
   void setCourseFilter(String? course) {
     if (course == state.selectedCourse) return;
     _searchDebounce?.cancel();
     emit(state.copyWith(selectedCourse: course, clearCourse: course == null));
-    loadStudents();
+    loadStudents(clearStudents: true);
   }
 
   @override
