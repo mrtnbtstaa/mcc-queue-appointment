@@ -14,7 +14,6 @@ import '../../../../shared/services/domain/usecases/get_services.dart';
 import 'cubit/services_cubit.dart';
 import 'cubit/services_state.dart';
 import 'widgets/portal_status_banner.dart';
-import 'widgets/priority_counter_notice.dart';
 import 'widgets/search_and_filter_bar.dart';
 import 'widgets/service_card.dart';
 
@@ -60,7 +59,7 @@ class ServicesContent extends StatelessWidget {
               },
             ),
             16.0.height,
-            const PriorityCounterNotice(),
+            // const PriorityCounterNotice(),
             16.0.height,
             BlocBuilder<ServicesCubit, ServicesState>(
               builder: (context, state) {
