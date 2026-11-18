@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-enum QueueTab { waiting, serving, done, skipped }
-
 enum QueueStatus { waiting, serving, done, skipped }
 
 QueueStatus queueStatusFromApi(String? value) {

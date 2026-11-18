@@ -1,3 +1,4 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -6,6 +7,7 @@ import 'core/config/app_config.dart';
 import 'core/di/injector.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/token_store.dart';
+import 'features/shared/filter_options/presentation/filter_options_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,11 +50,14 @@ class MccRegistrarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: router,
-      title: 'MCC Registrar',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
+    return BlocProvider(
+      create: (_) => getIt<FilterOptionsCubit>()..load(),
+      child: MaterialApp.router(
+        routerConfig: router,
+        title: 'MCC Registrar',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(useMaterial3: true),
+      ),
     );
   }
 }

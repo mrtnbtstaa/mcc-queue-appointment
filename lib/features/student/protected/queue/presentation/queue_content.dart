@@ -10,7 +10,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../shared/queue/presentation/bloc/queue_bloc.dart';
 import '../../../../shared/queue/presentation/bloc/queue_event.dart';
 import '../../../../shared/queue/presentation/bloc/queue_state.dart';
-import 'widgets/counter_instructions_card.dart';
+// import 'widgets/counter_instructions_card.dart';
 import 'widgets/counter_status_card.dart';
 import 'widgets/live_counter_queue_list.dart';
 import 'widgets/queue_header.dart';
@@ -45,7 +45,7 @@ class _QueueView extends StatelessWidget {
               queues: state.queues,
             ),
             16.0.height,
-            const CounterInstructionsCard(),
+            // const CounterInstructionsCard(),
           ],
         );
 

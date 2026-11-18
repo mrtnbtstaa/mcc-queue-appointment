@@ -189,15 +189,19 @@ class _AppointmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = schedule.status.toUpperCase();
-    final isFull = status == 'FULL';
+    final remaining = schedule.remainingCapacity ?? schedule.capacity;
+    final isFull = status == 'FULL' || remaining <= 0;
     final isInactive = status == 'INACTIVE' || status == 'CLOSED';
-    final isAvailable = status == 'AVAILABLE' || status == 'OPEN';
+    final isAvailable =
+        !isFull && !isInactive && (status == 'AVAILABLE' || status == 'OPEN');
 
     final statusLabel = isFull
         ? 'Full'
         : isInactive
         ? 'Inactive'
-        : 'Available';
+        : isAvailable
+        ? 'Available'
+        : 'Unavailable';
 
     final slotId = schedule.id;
     final canBook =
@@ -216,9 +220,15 @@ class _AppointmentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: TAppColors.primary.withValues(alpha: 0.06),
+        color: isAvailable
+            ? TAppColors.primary.withValues(alpha: 0.06)
+            : TAppColors.background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TAppColors.primary.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: isAvailable
+              ? TAppColors.primary.withValues(alpha: 0.18)
+              : TAppColors.border,
+        ),
       ),
       child: Column(
         children: [
@@ -299,7 +309,7 @@ class _AppointmentCard extends StatelessWidget {
                     ),
                     2.0.height,
                     Text(
-                      '${schedule.capacity}',
+                      '$remaining of ${schedule.capacity} slots left',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

@@ -10,6 +10,7 @@ class AppointmentScheduleModel extends AppointmentSchedule {
     required super.endTime,
     required super.date,
     required super.capacity,
+    super.remainingCapacity,
     required super.service,
     required super.serviceName,
   });
@@ -22,6 +23,7 @@ class AppointmentScheduleModel extends AppointmentSchedule {
       endTime: json['end_time'] ?? '',
       date: DateTime.parse(json['appointment_date']),
       capacity: json['capacity'] ?? 0,
+      remainingCapacity: json['remaining_capacity'] as int?,
       service: json['service'] ?? '',
       serviceName: json["service_name"] ?? "",
     );

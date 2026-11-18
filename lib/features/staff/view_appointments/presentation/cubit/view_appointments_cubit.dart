@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/errors/failure.dart';
 import '../../../../shared/appointments/domain/usecases/get_appointments.dart';
 import '../../../../shared/appointments/domain/usecases/update_appointment_status.dart';
-import '../../domain/model.dart';
 import 'view_appointments_state.dart';
 
 class ViewAppointmentsCubit extends Cubit<ViewAppointmentsState> {
@@ -30,11 +29,17 @@ class ViewAppointmentsCubit extends Cubit<ViewAppointmentsState> {
     _searchDebounce = Timer(const Duration(milliseconds: 400), _load);
   }
 
-  void setFilterTab(AppointmentTab tab) {
-    if (tab == state.selectedTab) return;
+  void setFilterTab(String? status) {
+    if (status == state.selectedStatus) return;
 
     _searchDebounce?.cancel();
-    emit(state.copyWith(selectedTab: tab, clearError: true));
+    emit(
+      state.copyWith(
+        selectedStatus: status,
+        clearStatus: status == null,
+        clearError: true,
+      ),
+    );
     _load();
   }
 
@@ -52,7 +57,7 @@ class ViewAppointmentsCubit extends Cubit<ViewAppointmentsState> {
 
     final result = await getAppointments.callPage(
       search: query.isEmpty ? null : query,
-      status: state.selectedTab.status,
+      status: state.selectedStatus,
       page: 1,
     );
 
@@ -89,7 +94,7 @@ class ViewAppointmentsCubit extends Cubit<ViewAppointmentsState> {
     final query = state.searchQuery.trim();
     final result = await getAppointments.callPage(
       search: query.isEmpty ? null : query,
-      status: state.selectedTab.status,
+      status: state.selectedStatus,
       page: state.page + 1,
     );
     if (isClosed || requestId != _requestId) return;

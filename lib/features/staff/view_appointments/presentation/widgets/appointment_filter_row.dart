@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_text_field.dart';
-import '../../domain/model.dart';
+import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../cubit/view_appointments_cubit.dart';
 import '../cubit/view_appointments_state.dart';
 
@@ -16,6 +16,12 @@ class AppointmentFilterRow extends StatelessWidget {
 
     return BlocBuilder<ViewAppointmentsCubit, ViewAppointmentsState>(
       builder: (context, state) {
+        final statuses = context
+            .watch<FilterOptionsCubit>()
+            .state
+            .options
+            .appointmentStatuses;
+
         return Column(
           children: [
             CommonTextField(
@@ -28,10 +34,15 @@ class AppointmentFilterRow extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  for (final tab in AppointmentTab.values) ...[
-                    if (tab != AppointmentTab.values.first)
-                      const SizedBox(width: 8),
-                    _buildTabButton(cubit, state, tab),
+                  _buildTabButton(cubit, state, null, 'All'),
+                  for (final status in statuses) ...[
+                    const SizedBox(width: 8),
+                    _buildTabButton(
+                      cubit,
+                      state,
+                      status.value,
+                      status.label,
+                    ),
                   ],
                 ],
               ),
@@ -45,12 +56,13 @@ class AppointmentFilterRow extends StatelessWidget {
   Widget _buildTabButton(
     ViewAppointmentsCubit cubit,
     ViewAppointmentsState state,
-    AppointmentTab tab,
+    String? status,
+    String label,
   ) {
-    final isSelected = state.selectedTab == tab;
+    final isSelected = state.selectedStatus == status;
 
     return InkWell(
-      onTap: () => cubit.setFilterTab(tab),
+      onTap: () => cubit.setFilterTab(status),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -62,7 +74,7 @@ class AppointmentFilterRow extends StatelessWidget {
           ),
         ),
         child: Text(
-          tab.label,
+          label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,

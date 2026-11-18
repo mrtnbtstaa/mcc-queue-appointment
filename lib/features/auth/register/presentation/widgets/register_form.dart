@@ -15,14 +15,58 @@ import '../cubit/register_state.dart';
 import 'password_strength_indicator.dart';
 
 enum Course {
-  bsit('BSIT', 'Bachelor of Science in Information Technology'),
-  bscs('BSCS', 'Bachelor of Science in Computer Science'),
-  bsis('BSIS', 'Bachelor of Science in Information Systems');
+  bsit('bsit', 'BSIT', 'Bachelor of Science in Information Technology'),
+  bshm('bshm', 'BSHM', 'Bachelor of Science in Hospitality Management'),
+  bstm('bstm', 'BSTM', 'Bachelor of Science in Tourism Management'),
+  bsa('bsa', 'BSA', 'Bachelor of Science in Accountancy'),
+  bsca('bsca', 'BSCA', 'Bachelor of Science in Customs Administration'),
+  bse('bse', 'BSE', 'Bachelor of Science in Entrepreneurship'),
+  bsma('bsma', 'BSMA', 'Bachelor of Science in Management Accounting'),
+  bsoa('bsoa', 'BSOA', 'Bachelor of Science in Office Administration'),
+  beed('beed', 'BEED', 'Bachelor of Elementary Education'),
+  beced('beced', 'BECED', 'Bachelor of Early Childhood Education'),
+  bsedEnglish(
+    'bsed-english',
+    'BSED',
+    'Bachelor of Secondary Education, major in English',
+  ),
+  bsedFilipino(
+    'bsed-filipino',
+    'BSED',
+    'Bachelor of Secondary Education, major in Filipino',
+  ),
+  bsedMath(
+    'bsed-math',
+    'BSED',
+    'Bachelor of Secondary Education, major in Mathematics',
+  ),
+  bsedScience(
+    'bsed-science',
+    'BSED',
+    'Bachelor of Secondary Education, major in Science',
+  ),
+  bsedSocialStudies(
+    'bsed-social-studies',
+    'BSED',
+    'Bachelor of Secondary Education, major in Social Studies',
+  ),
+  bped('bped', 'BPED', 'Bachelor of Physical Education'),
+  btvte('btvte', 'BTVTE', 'Bachelor of Technical-Vocational Teacher Education'),
+  abHistory('ab-history', 'AB History', 'Bachelor of Arts in History'),
+  abPsychology(
+    'ab-psychology',
+    'AB Psychology',
+    'Bachelor of Arts in Psychology',
+  ),
+  bpa('bpa', 'BPA', 'Bachelor of Public Administration'),
+  bsBio('bsbio', 'BSBIO', 'Bachelor of Science in Biology'),
+  bsLm('bslm', 'BSLM', 'Bachelor of Science in Legal Management');
 
+  final String value;
   final String code;
   final String description;
 
-  const Course(this.code, this.description);
+  const Course(this.value, this.code, this.description);
 }
 
 /// Single, self-contained register form.
@@ -51,6 +95,10 @@ class _RegisterFormState extends State<RegisterForm> {
 
   String _passwordStrengthText = '';
   double _passwordStrengthScore = 0.0;
+
+  bool get _passwordsMatch =>
+      _confirmPasswordController.text.isNotEmpty &&
+      _confirmPasswordController.text == _passwordController.text;
 
   @override
   void dispose() {
@@ -254,7 +302,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 prefixIcon: Icons.school_outlined,
                 items: Course.values.map((course) {
                   return DropdownMenuItem<String>(
-                    value: course.code.toLowerCase(),
+                    value: course.value,
                     child: Text(
                       '${course.code} - ${course.description}',
                       overflow: TextOverflow.ellipsis,
@@ -341,7 +389,9 @@ class _RegisterFormState extends State<RegisterForm> {
               CommonTextField(
                 hintText: '••••••••••••••••',
                 controller: _confirmPasswordController,
+                borderColor: _passwordsMatch ? TAppColors.success : null,
                 obscureText: _obscureConfirmPassword,
+                onChanged: (_) => setState(() {}),
                 prefixIcon: Icon(
                   Icons.lock_outline,
                   size: 18,

@@ -29,6 +29,7 @@ class CommonTextField extends StatefulWidget {
     this.inputFormatters,
     this.focusNode,
     this.fillColor,
+    this.borderColor,
     this.borderRadius,
     this.contentPadding,
     this.hintStyle,
@@ -55,6 +56,7 @@ class CommonTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final FocusNode? focusNode;
   final Color? fillColor;
+  final Color? borderColor;
   final double? borderRadius;
   final EdgeInsetsGeometry? contentPadding;
   final TextStyle? hintStyle;
@@ -155,19 +157,26 @@ class _CommonTextFieldState extends State<CommonTextField> {
               borderRadius: BorderRadius.circular(
                 widget.borderRadius ?? Dimension.radius10,
               ),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: widget.borderColor ?? Colors.grey.shade300,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 widget.borderRadius ?? Dimension.radius10,
               ),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: widget.borderColor ?? Colors.grey.shade300,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 widget.borderRadius ?? Dimension.radius10,
               ),
-              borderSide: BorderSide(color: TAppColors.primary, width: 1.5),
+              borderSide: BorderSide(
+                color: widget.borderColor ?? TAppColors.primary,
+                width: 1.5,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(

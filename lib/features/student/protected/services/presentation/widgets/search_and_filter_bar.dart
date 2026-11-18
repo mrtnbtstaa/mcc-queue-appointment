@@ -1,3 +1,4 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
@@ -6,15 +7,16 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_filter_chips.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../../../core/widgets/common_text_field.dart';
+import '../../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 
 class SearchAndFilterBar extends StatelessWidget {
-  final int selectedFilterIndex;
-  final ValueChanged<int> onFilterChanged;
+  final String? selectedCategory;
+  final ValueChanged<String?> onFilterChanged;
   final ValueChanged<String> onSearchChanged;
 
   const SearchAndFilterBar({
     super.key,
-    required this.selectedFilterIndex,
+    required this.selectedCategory,
     required this.onFilterChanged,
     required this.onSearchChanged,
   });
@@ -56,21 +58,36 @@ class SearchAndFilterBar extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              CommonFilterChips(
-                items: [
-                  FilterChipItem(icon: Icons.grid_view, label: "All Services"),
-                  FilterChipItem(
-                    icon: Icons.school_outlined,
-                    label: "Enrollment",
-                  ),
-                  FilterChipItem(
-                    icon: Icons.card_membership_outlined,
-                    label: "Certificates",
-                  ),
-                  FilterChipItem(icon: Icons.folder_outlined, label: "Records"),
-                ],
-                selectedFilterIndex: selectedFilterIndex,
-                onFilterChanged: onFilterChanged,
+              BlocBuilder<FilterOptionsCubit, FilterOptionsState>(
+                builder: (context, filterState) {
+                  final categories =
+                      filterState.options.serviceCategories;
+                  final selectedIndex = selectedCategory == null
+                      ? 0
+                      : categories.indexWhere(
+                              (category) =>
+                                  category.value == selectedCategory,
+                            ) +
+                            1;
+
+                  return CommonFilterChips(
+                    items: [
+                      const FilterChipItem(
+                        icon: Icons.grid_view,
+                        label: 'All Services',
+                      ),
+                      for (final category in categories)
+                        FilterChipItem(
+                          icon: Icons.folder_outlined,
+                          label: category.label,
+                        ),
+                    ],
+                    selectedFilterIndex: selectedIndex,
+                    onFilterChanged: (index) => onFilterChanged(
+                      index == 0 ? null : categories[index - 1].value,
+                    ),
+                  );
+                },
               ),
             ],
           ),

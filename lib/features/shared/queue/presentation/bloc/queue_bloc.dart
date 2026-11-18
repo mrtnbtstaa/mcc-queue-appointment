@@ -27,7 +27,7 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     on<QueueRefreshed>(_onRefreshed);
     on<QueueLoadMoreRequested>(_onLoadMore);
     on<QueueStopped>(_onStopped);
-    on<QueueTabChanged>(_onTabChanged);
+    on<QueueStatusChanged>(_onStatusChanged);
     on<QueueCallRequested>(_onCallRequested);
     on<QueueCallNextRequested>(_onCallNextRequested);
     on<QueueCompleteRequested>(_onCompleteRequested);
@@ -86,8 +86,8 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
     _pollTimer = null;
   }
 
-  void _onTabChanged(QueueTabChanged event, Emitter<QueueState> emit) {
-    emit(state.copyWith(selectedTab: event.tab));
+  void _onStatusChanged(QueueStatusChanged event, Emitter<QueueState> emit) {
+    emit(state.copyWith(selectedStatus: event.status));
   }
 
   Future<void> _onCallRequested(

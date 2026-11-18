@@ -7,7 +7,7 @@ class QueueState extends Equatable {
   final bool isUpdating;
   final String? error;
   final List<QueueItemModel> queues;
-  final QueueTab selectedTab;
+  final String selectedStatus;
   final int page;
   final int totalPages;
   final bool isLoadingMore;
@@ -17,21 +17,16 @@ class QueueState extends Equatable {
     this.isUpdating = false,
     this.error,
     this.queues = const [],
-    this.selectedTab = QueueTab.waiting,
+    this.selectedStatus = 'WAITING',
     this.page = 1,
     this.totalPages = 1,
     this.isLoadingMore = false,
   });
 
   List<QueueItemModel> get filteredQueue {
-    return queues.where((item) {
-      return switch (selectedTab) {
-        QueueTab.waiting => item.status == QueueStatus.waiting,
-        QueueTab.serving => item.status == QueueStatus.serving,
-        QueueTab.done => item.status == QueueStatus.done,
-        QueueTab.skipped => item.status == QueueStatus.skipped,
-      };
-    }).toList();
+    return queues
+        .where((item) => item.status.apiValue == selectedStatus)
+        .toList();
   }
 
   QueueItemModel? get currentlyServing {
@@ -55,15 +50,10 @@ class QueueState extends Equatable {
     return null;
   }
 
-  int countFor(QueueTab tab) {
-    return queues.where((item) {
-      return switch (tab) {
-        QueueTab.waiting => item.status == QueueStatus.waiting,
-        QueueTab.serving => item.status == QueueStatus.serving,
-        QueueTab.done => item.status == QueueStatus.done,
-        QueueTab.skipped => item.status == QueueStatus.skipped,
-      };
-    }).length;
+  int countFor(String status) {
+    return queues
+        .where((item) => item.status.apiValue == status)
+        .length;
   }
 
   int get activeCount => queues
@@ -80,7 +70,7 @@ class QueueState extends Equatable {
     String? error,
     bool clearError = false,
     List<QueueItemModel>? queues,
-    QueueTab? selectedTab,
+    String? selectedStatus,
     int? page,
     int? totalPages,
     bool? isLoadingMore,
@@ -90,7 +80,7 @@ class QueueState extends Equatable {
       isUpdating: isUpdating ?? this.isUpdating,
       error: clearError ? null : (error ?? this.error),
       queues: queues ?? this.queues,
-      selectedTab: selectedTab ?? this.selectedTab,
+      selectedStatus: selectedStatus ?? this.selectedStatus,
       page: page ?? this.page,
       totalPages: totalPages ?? this.totalPages,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
@@ -103,7 +93,7 @@ class QueueState extends Equatable {
     isUpdating,
     error,
     queues,
-    selectedTab,
+    selectedStatus,
     page,
     totalPages,
     isLoadingMore,

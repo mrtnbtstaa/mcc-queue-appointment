@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_text.dart';
+import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../../../shared/queue/domain/entities/queue_entity.dart';
 import '../../../../shared/queue/presentation/bloc/queue_bloc.dart';
 import '../../../../shared/queue/presentation/bloc/queue_event.dart';
@@ -18,6 +19,11 @@ class LiveCounterQueueSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = context.read<QueueBloc>();
     final list = state.filteredQueue;
+    final statuses = context
+        .watch<FilterOptionsCubit>()
+        .state
+        .options
+        .queueStatuses;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,33 +58,15 @@ class LiveCounterQueueSection extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildTab(
-                QueueTab.waiting,
-                'Waiting (${state.countFor(QueueTab.waiting)})',
-                state.selectedTab,
-                bloc,
-              ),
-              8.0.width,
-              _buildTab(
-                QueueTab.serving,
-                'Serving (${state.countFor(QueueTab.serving)})',
-                state.selectedTab,
-                bloc,
-              ),
-              8.0.width,
-              _buildTab(
-                QueueTab.done,
-                'Done (${state.countFor(QueueTab.done)})',
-                state.selectedTab,
-                bloc,
-              ),
-              8.0.width,
-              _buildTab(
-                QueueTab.skipped,
-                'Skipped (${state.countFor(QueueTab.skipped)})',
-                state.selectedTab,
-                bloc,
-              ),
+              for (var i = 0; i < statuses.length; i++) ...[
+                if (i > 0) 8.0.width,
+                _buildTab(
+                  statuses[i].value,
+                  '${statuses[i].label} (${state.countFor(statuses[i].value)})',
+                  state.selectedStatus,
+                  bloc,
+                ),
+              ],
             ],
           ),
         ),
@@ -192,14 +180,14 @@ class LiveCounterQueueSection extends StatelessWidget {
   }
 
   Widget _buildTab(
-    QueueTab tab,
+    String status,
     String label,
-    QueueTab currentTab,
+    String currentStatus,
     QueueBloc bloc,
   ) {
-    final isSelected = tab == currentTab;
+    final isSelected = status == currentStatus;
     return InkWell(
-      onTap: () => bloc.add(QueueTabChanged(tab)),
+      onTap: () => bloc.add(QueueStatusChanged(status)),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

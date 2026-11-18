@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/errors/failure.dart';
 import '../../../../shared/profile/domain/usecases/get_users.dart';
-import '../../domain/model.dart';
 import 'students_state.dart';
 
 class StudentsCubit extends Cubit<StudentsState> {
@@ -17,13 +16,7 @@ class StudentsCubit extends Cubit<StudentsState> {
   Future<void> loadStudents() async {
     emit(state.copyWith(isLoading: true, clearError: true));
     final query = state.searchQuery.trim();
-    final course = switch (state.selectedProgram) {
-      ProgramFilter.all => null,
-      ProgramFilter.bsit => 'bsit',
-      ProgramFilter.bsed => 'bsed',
-      ProgramFilter.bsba => 'bsba',
-      ProgramFilter.bscpe => 'bscpe',
-    };
+    final course = state.selectedCourse;
     final requestId = ++_requestId;
     final result = await getUsers.callPage(
       GetUsersParams(search: query.isEmpty ? null : query, course: course),
@@ -52,13 +45,7 @@ class StudentsCubit extends Cubit<StudentsState> {
     final requestId = _requestId;
     emit(state.copyWith(isLoading: true, clearError: true));
     final query = state.searchQuery.trim();
-    final course = switch (state.selectedProgram) {
-      ProgramFilter.all => null,
-      ProgramFilter.bsit => 'bsit',
-      ProgramFilter.bsed => 'bsed',
-      ProgramFilter.bsba => 'bsba',
-      ProgramFilter.bscpe => 'bscpe',
-    };
+    final course = state.selectedCourse;
     final result = await getUsers.callPage(
       GetUsersParams(
         search: query.isEmpty ? null : query,
@@ -94,10 +81,10 @@ class StudentsCubit extends Cubit<StudentsState> {
     _searchDebounce = Timer(const Duration(milliseconds: 400), loadStudents);
   }
 
-  void setProgramFilter(ProgramFilter program) {
-    if (program == state.selectedProgram) return;
+  void setCourseFilter(String? course) {
+    if (course == state.selectedCourse) return;
     _searchDebounce?.cancel();
-    emit(state.copyWith(selectedProgram: program));
+    emit(state.copyWith(selectedCourse: course, clearCourse: course == null));
     loadStudents();
   }
 

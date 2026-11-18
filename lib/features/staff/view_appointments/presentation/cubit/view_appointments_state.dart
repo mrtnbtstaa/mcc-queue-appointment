@@ -1,12 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../shared/appointments/domain/entities/appointment.dart';
-import '../../domain/model.dart';
 
 enum ViewAppointmentsStatus { initial, loading, success, failure }
 
 class ViewAppointmentsState extends Equatable {
-  final AppointmentTab selectedTab;
+  final String? selectedStatus;
   final String searchQuery;
   final List<Appointment> appointments;
   final ViewAppointmentsStatus status;
@@ -16,7 +15,7 @@ class ViewAppointmentsState extends Equatable {
   final int totalPages;
 
   const ViewAppointmentsState({
-    this.selectedTab = AppointmentTab.all,
+    this.selectedStatus,
     this.searchQuery = '',
     this.appointments = const [],
     this.status = ViewAppointmentsStatus.initial,
@@ -27,7 +26,8 @@ class ViewAppointmentsState extends Equatable {
   });
 
   ViewAppointmentsState copyWith({
-    AppointmentTab? selectedTab,
+    String? selectedStatus,
+    bool clearStatus = false,
     String? searchQuery,
     List<Appointment>? appointments,
     ViewAppointmentsStatus? status,
@@ -39,7 +39,9 @@ class ViewAppointmentsState extends Equatable {
     int? totalPages,
   }) {
     return ViewAppointmentsState(
-      selectedTab: selectedTab ?? this.selectedTab,
+      selectedStatus: clearStatus
+          ? null
+          : selectedStatus ?? this.selectedStatus,
       searchQuery: searchQuery ?? this.searchQuery,
       appointments: appointments ?? this.appointments,
       status: status ?? this.status,
@@ -52,7 +54,7 @@ class ViewAppointmentsState extends Equatable {
 
   @override
   List<Object?> get props => [
-    selectedTab,
+    selectedStatus,
     searchQuery,
     appointments,
     status,

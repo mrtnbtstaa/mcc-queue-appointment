@@ -38,6 +38,8 @@ import '../../features/shared/appointments/domain/usecases/update_appointment_st
 import '../../features/shared/appointments/presentation/bloc/appointment_bloc.dart';
 import '../../features/shared/dashboard/data/dashboard_remote_data_source.dart';
 import '../../features/shared/dashboard/presentation/dashboard_cubit.dart';
+import '../../features/shared/filter_options/data/filter_options_remote_data_source.dart';
+import '../../features/shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../features/shared/notifications/data/notification_remote_data_source.dart';
 import '../../features/shared/notifications/presentation/notifications_cubit.dart';
 import '../../features/shared/profile/data/datasources/profile_remote_data_source.dart';
@@ -355,6 +357,15 @@ void dashboardDependencies() {
   );
 }
 
+void filterOptionsDependencies() {
+  getIt.registerLazySingleton<FilterOptionsRemoteDataSource>(
+    () => FilterOptionsRemoteDataSource(getIt<ApiClient>()),
+  );
+  getIt.registerFactory<FilterOptionsCubit>(
+    () => FilterOptionsCubit(getIt<FilterOptionsRemoteDataSource>()),
+  );
+}
+
 void transactionHistoryDependencies() {
   getIt.registerLazySingleton<TransactionRemoteDataSource>(
     () => TransactionRemoteDataSourceImpl(getIt<ApiClient>()),
@@ -440,4 +451,5 @@ Future<void> configureDependencies({required String apiBaseUrl}) async {
   profileDependencies();
   notificationDependencies();
   dashboardDependencies();
+  filterOptionsDependencies();
 }

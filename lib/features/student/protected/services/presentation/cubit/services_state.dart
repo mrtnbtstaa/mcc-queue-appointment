@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../../shared/services/domain/entities/service_entity.dart';
 
 class ServicesState extends Equatable {
-  final int selectedFilterIndex;
+  final String? selectedCategory;
   final String searchQuery;
   final List<ServiceEntity> services;
   final bool isLoading;
@@ -12,7 +12,7 @@ class ServicesState extends Equatable {
   final int totalPages;
 
   const ServicesState({
-    this.selectedFilterIndex = 0,
+    this.selectedCategory,
     this.searchQuery = '',
     this.services = const [],
     this.isLoading = false,
@@ -22,7 +22,8 @@ class ServicesState extends Equatable {
   });
 
   ServicesState copyWith({
-    int? selectedFilterIndex,
+    String? selectedCategory,
+    bool clearCategory = false,
     String? searchQuery,
     List<ServiceEntity>? services,
     bool? isLoading,
@@ -32,7 +33,9 @@ class ServicesState extends Equatable {
     int? totalPages,
   }) {
     return ServicesState(
-      selectedFilterIndex: selectedFilterIndex ?? this.selectedFilterIndex,
+      selectedCategory: clearCategory
+          ? null
+          : selectedCategory ?? this.selectedCategory,
       searchQuery: searchQuery ?? this.searchQuery,
       services: services ?? this.services,
       isLoading: isLoading ?? this.isLoading,
@@ -44,7 +47,7 @@ class ServicesState extends Equatable {
 
   @override
   List<Object?> get props => [
-    selectedFilterIndex,
+    selectedCategory,
     searchQuery,
     services,
     isLoading,

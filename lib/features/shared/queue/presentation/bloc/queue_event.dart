@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/queue_entity.dart';
-
 sealed class QueueEvent extends Equatable {
   const QueueEvent();
 
@@ -25,13 +23,13 @@ final class QueueStopped extends QueueEvent {
   const QueueStopped();
 }
 
-final class QueueTabChanged extends QueueEvent {
-  final QueueTab tab;
+final class QueueStatusChanged extends QueueEvent {
+  final String status;
 
-  const QueueTabChanged(this.tab);
+  const QueueStatusChanged(this.status);
 
   @override
-  List<Object?> get props => [tab];
+  List<Object?> get props => [status];
 }
 
 final class QueueCallRequested extends QueueEvent {

@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_bottom_sheet.dart';
 import '../../../../../core/widgets/common_elevated_button.dart';
+import '../../../../shared/filter_options/domain/filter_options.dart';
+import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../../../shared/services/domain/entities/service_entity.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_bloc.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_event.dart';
@@ -37,18 +39,12 @@ class AddRegistrarServiceBottomSheet extends StatefulWidget {
 
 class _AddRegistrarServiceBottomSheetState
     extends State<AddRegistrarServiceBottomSheet> {
-  static const List<String> _defaultCategories = [
-    'Academic Enrollment',
-    'Financial Clearance',
-    'Transcript & Records',
-  ];
-
   late final TextEditingController _serviceNameController;
   late final TextEditingController _feeController;
   late final TextEditingController _durationMinController;
   late final TextEditingController _durationMaxController;
 
-  late final List<String> _categories;
+  late final List<FilterOption> _categories;
   late String _selectedCategory;
   late bool _isActiveForBooking;
   late List<String> _documents;
@@ -71,18 +67,25 @@ class _AddRegistrarServiceBottomSheetState
       text: (service?.durationMax ?? 30).toString(),
     );
 
-    // Keep the saved category selectable even if it isn't in the default list.
+    // Keep the saved category selectable even if it isn't in the backend list.
     final existing = service?.category;
+    final options = context
+        .read<FilterOptionsCubit>()
+        .state
+        .options
+        .serviceCategories;
     _categories = [
-      ..._defaultCategories,
+      ...options,
       if (existing != null &&
           existing.isNotEmpty &&
-          !_defaultCategories.contains(existing))
-        existing,
+          !options.any((option) => option.value == existing))
+        FilterOption(value: existing, label: existing),
     ];
-    _selectedCategory = (existing != null && _categories.contains(existing))
+    _selectedCategory =
+        (existing != null &&
+            _categories.any((option) => option.value == existing))
         ? existing
-        : _categories.first;
+        : (_categories.isEmpty ? '' : _categories.first.value);
 
     _isActiveForBooking = service?.isActive ?? true;
 
@@ -131,6 +134,10 @@ class _AddRegistrarServiceBottomSheetState
     }
     if (durationMax < durationMin) {
       _showError('Maximum duration must be at least the minimum');
+      return;
+    }
+    if (_selectedCategory.isEmpty) {
+      _showError('Please select a category');
       return;
     }
 
@@ -324,7 +331,18 @@ class _AddRegistrarServiceBottomSheetState
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: _selectedCategory,
+                              value: _categories.any(
+                                (option) => option.value == _selectedCategory,
+                              )
+                                  ? _selectedCategory
+                                  : null,
+                              hint: const Text(
+                                'Select category',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: TAppColors.textHint,
+                                ),
+                              ),
                               isExpanded: true,
                               icon: const Icon(
                                 Icons.keyboard_arrow_down,
@@ -337,9 +355,9 @@ class _AddRegistrarServiceBottomSheetState
                               ),
                               items: _categories
                                   .map(
-                                    (value) => DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
+                                    (option) => DropdownMenuItem<String>(
+                                      value: option.value,
+                                      child: Text(option.label),
                                     ),
                                   )
                                   .toList(),

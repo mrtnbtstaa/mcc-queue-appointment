@@ -15,10 +15,15 @@ class ServicesCubit extends Cubit<ServicesState> {
 
   Future<void> loadServices() => _fetch();
 
-  void changeFilter(int index) {
-    if (state.selectedFilterIndex == index) return;
+  void changeFilter(String? category) {
+    if (state.selectedCategory == category) return;
     _searchDebounce?.cancel();
-    emit(state.copyWith(selectedFilterIndex: index));
+    emit(
+      state.copyWith(
+        selectedCategory: category,
+        clearCategory: category == null,
+      ),
+    );
     _fetch();
   }
 
@@ -38,7 +43,7 @@ class ServicesCubit extends Cubit<ServicesState> {
 
       final result = await _getServices.callPage(
         search: query.isEmpty ? null : query,
-        category: _categoryFor(state.selectedFilterIndex),
+        category: state.selectedCategory,
         isActive: true,
         page: 1,
       );
@@ -80,7 +85,7 @@ class ServicesCubit extends Cubit<ServicesState> {
     final query = state.searchQuery.trim();
     final result = await _getServices.callPage(
       search: query.isEmpty ? null : query,
-      category: _categoryFor(state.selectedFilterIndex),
+      category: state.selectedCategory,
       isActive: true,
       page: state.page + 1,
     );
@@ -99,13 +104,6 @@ class ServicesCubit extends Cubit<ServicesState> {
       ),
     );
   }
-
-  String? _categoryFor(int index) => switch (index) {
-    1 => 'Enrollment',
-    2 => 'Certificates',
-    3 => 'Records',
-    _ => null,
-  };
 
   @override
   Future<void> close() {

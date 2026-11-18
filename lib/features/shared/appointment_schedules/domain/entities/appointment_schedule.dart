@@ -11,6 +11,7 @@ class AppointmentSchedule extends Equatable {
   final String endTime;
   final DateTime date;
   final int capacity;
+  final int? remainingCapacity;
 
   const AppointmentSchedule({
     this.id,
@@ -21,6 +22,7 @@ class AppointmentSchedule extends Equatable {
     required this.endTime,
     required this.date,
     required this.capacity,
+    this.remainingCapacity,
   });
 
   @override
@@ -33,5 +35,6 @@ class AppointmentSchedule extends Equatable {
     endTime,
     date,
     capacity,
+    remainingCapacity,
   ];
 }

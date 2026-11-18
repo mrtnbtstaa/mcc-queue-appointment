@@ -5,7 +5,7 @@ import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../../../core/widgets/common_text_field.dart';
-import '../../domain/model.dart';
+import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../cubit/students_cubit.dart';
 import '../cubit/students_state.dart';
 
@@ -18,6 +18,12 @@ class StudentsFilterSection extends StatelessWidget {
 
     return BlocBuilder<StudentsCubit, StudentsState>(
       builder: (context, state) {
+        final courses = context
+            .watch<FilterOptionsCubit>()
+            .state
+            .options
+            .courses;
+
         return Column(
           children: [
             CommonTextField(
@@ -36,7 +42,7 @@ class StudentsFilterSection extends StatelessWidget {
                   fontColor: TAppColors.textHint,
                 ),
                 GestureDetector(
-                  onTap: () => cubit.setProgramFilter(ProgramFilter.all),
+                  onTap: () => cubit.setCourseFilter(null),
                   child: CommonText(
                     text: 'Clear',
                     fontSize: 11,
@@ -51,15 +57,17 @@ class StudentsFilterSection extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildProgramChip(cubit, state, ProgramFilter.all, 'All'),
-                  8.0.width,
-                  _buildProgramChip(cubit, state, ProgramFilter.bsit, 'BSIT'),
-                  8.0.width,
-                  _buildProgramChip(cubit, state, ProgramFilter.bsed, 'BSED'),
-                  8.0.width,
-                  _buildProgramChip(cubit, state, ProgramFilter.bsba, 'BSBA'),
-                  8.0.width,
-                  _buildProgramChip(cubit, state, ProgramFilter.bscpe, 'BSCpE'),
+                  _buildProgramChip(cubit, state, null, 'All'),
+                  for (final course in courses)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: _buildProgramChip(
+                        cubit,
+                        state,
+                        course.value,
+                        course.label,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -72,12 +80,12 @@ class StudentsFilterSection extends StatelessWidget {
   Widget _buildProgramChip(
     StudentsCubit cubit,
     StudentsState state,
-    ProgramFilter program,
+    String? course,
     String label,
   ) {
-    final isSelected = state.selectedProgram == program;
+    final isSelected = state.selectedCourse == course;
     return InkWell(
-      onTap: () => cubit.setProgramFilter(program),
+      onTap: () => cubit.setCourseFilter(course),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),

@@ -50,9 +50,9 @@ class ServicesContent extends StatelessWidget {
             BlocBuilder<ServicesCubit, ServicesState>(
               builder: (context, state) {
                 return SearchAndFilterBar(
-                  selectedFilterIndex: state.selectedFilterIndex,
-                  onFilterChanged: (index) =>
-                      context.read<ServicesCubit>().changeFilter(index),
+                  selectedCategory: state.selectedCategory,
+                  onFilterChanged: (category) =>
+                      context.read<ServicesCubit>().changeFilter(category),
                   onSearchChanged: (query) =>
                       context.read<ServicesCubit>().searchServices(query),
                 );

@@ -1,11 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../shared/profile/domain/entities/profile_entity.dart';
-import '../../domain/model.dart';
 
 class StudentsState extends Equatable {
   final String searchQuery;
-  final ProgramFilter selectedProgram;
+  final String? selectedCourse;
   final List<ProfileEntity> students;
   final bool isLoading;
   final String? error;
@@ -14,7 +13,7 @@ class StudentsState extends Equatable {
 
   const StudentsState({
     this.searchQuery = '',
-    this.selectedProgram = ProgramFilter.all,
+    this.selectedCourse,
     this.students = const [],
     this.isLoading = false,
     this.error,
@@ -26,7 +25,8 @@ class StudentsState extends Equatable {
 
   StudentsState copyWith({
     String? searchQuery,
-    ProgramFilter? selectedProgram,
+    String? selectedCourse,
+    bool clearCourse = false,
     List<ProfileEntity>? students,
     bool? isLoading,
     String? error,
@@ -35,7 +35,7 @@ class StudentsState extends Equatable {
     int? totalPages,
   }) => StudentsState(
     searchQuery: searchQuery ?? this.searchQuery,
-    selectedProgram: selectedProgram ?? this.selectedProgram,
+    selectedCourse: clearCourse ? null : selectedCourse ?? this.selectedCourse,
     students: students ?? this.students,
     isLoading: isLoading ?? this.isLoading,
     error: clearError ? null : error ?? this.error,
@@ -46,7 +46,7 @@ class StudentsState extends Equatable {
   @override
   List<Object?> get props => [
     searchQuery,
-    selectedProgram,
+    selectedCourse,
     students,
     isLoading,
     error,

@@ -5,6 +5,7 @@ import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../../../core/widgets/common_text_field.dart';
+import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_bloc.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_event.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_state.dart';
@@ -40,26 +41,21 @@ class _ServicesFilterBarState extends State<ServicesFilterBar> {
     return BlocBuilder<ManageServicesBloc, ManageServicesState>(
       bloc: widget.bloc,
       builder: (context, state) {
+        final serviceCategories = context
+            .watch<FilterOptionsCubit>()
+            .state
+            .options
+            .serviceCategories;
         final categories = [
-          {'label': 'All', 'count': state.allServices.length},
-          {
-            'label': 'Enrollment',
-            'count': state.allServices
-                .where((s) => s.category == 'Enrollment')
-                .length,
-          },
-          {
-            'label': 'Certificates',
-            'count': state.allServices
-                .where((s) => s.category == 'Certificates')
-                .length,
-          },
-          {
-            'label': 'Records',
-            'count': state.allServices
-                .where((s) => s.category == 'Records')
-                .length,
-          },
+          (value: 'All', label: 'All', count: state.allServices.length),
+          for (final category in serviceCategories)
+            (
+              value: category.value,
+              label: category.label,
+              count: state.allServices
+                  .where((service) => service.category == category.value)
+                  .length,
+            ),
         ];
 
         return Column(
@@ -84,15 +80,13 @@ class _ServicesFilterBarState extends State<ServicesFilterBar> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: categories.map((cat) {
-                  final label = cat['label'] as String;
-                  final count = cat['count'] as int;
-                  final isSelected = state.selectedCategory == label;
+                  final isSelected = state.selectedCategory == cat.value;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: GestureDetector(
                       onTap: () =>
-                          widget.bloc.add(SelectServiceCategory(label)),
+                          widget.bloc.add(SelectServiceCategory(cat.value)),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -113,7 +107,7 @@ class _ServicesFilterBarState extends State<ServicesFilterBar> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CommonText(
-                              text: label,
+                              text: cat.label,
                               fontColor: isSelected
                                   ? TAppColors.surface
                                   : TAppColors.textSecondary,
@@ -133,7 +127,7 @@ class _ServicesFilterBarState extends State<ServicesFilterBar> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: CommonText(
-                                text: '$count',
+                                text: '${cat.count}',
                                 fontColor: isSelected
                                     ? TAppColors.surface
                                     : TAppColors.textMuted,
