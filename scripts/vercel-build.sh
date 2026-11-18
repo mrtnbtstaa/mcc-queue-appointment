@@ -7,7 +7,12 @@ flutter_version="3.50.0"
 flutter_root="/tmp/flutter-sdk-${flutter_version}"
 archive="/tmp/flutter-linux-${flutter_version}.tar.xz"
 
-if ! command -v flutter >/dev/null 2>&1; then
+installed_flutter=""
+if command -v flutter >/dev/null 2>&1; then
+  installed_flutter="$(flutter --version 2>/dev/null | sed -n '1p' || true)"
+fi
+
+if [[ "$installed_flutter" != "Flutter ${flutter_version} "* ]]; then
   curl --fail --location --retry 3 \
     "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${flutter_version}-stable.tar.xz" \
     --output "$archive"

@@ -22,7 +22,7 @@ class AppConfig {
     appName: 'MyApp',
     baseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'https://api.example.com/api/',
+      defaultValue: 'https://mcc-queue-appointment-be.onrender.com/api/',
     ),
   );
 }
