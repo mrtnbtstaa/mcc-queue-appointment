@@ -4,6 +4,7 @@ import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/style/font.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_bottom_sheet.dart';
+import '../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../../shared/transaction_history/domain/entities/transaction_entity.dart';
 import 'transaction_detail_header.dart';
@@ -16,7 +17,7 @@ class TransactionDetailBottomSheet extends StatelessWidget {
     BuildContext context, {
     required TransactionEntity transaction,
   }) {
-    showModalBottomSheet(
+    CommonResponsiveModal.show<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

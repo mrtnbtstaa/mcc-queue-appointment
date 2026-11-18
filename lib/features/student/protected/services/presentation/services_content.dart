@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/widgets/common_adaptive_grid.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
+import '../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../core/di/injector.dart';
 import '../../../../../core/router/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -147,8 +148,9 @@ class ServicesContent extends StatelessWidget {
   }
 
   void _showChecklist(BuildContext context, ServiceEntity service) {
-    showModalBottomSheet<void>(
+    CommonResponsiveModal.show<void>(
       context: context,
+      isScrollControlled: false,
       showDragHandle: true,
       builder: (_) => SafeArea(
         child: SingleChildScrollView(

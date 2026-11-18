@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_bottom_sheet.dart';
+import '../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../core/widgets/common_elevated_button.dart';
 import '../../../../shared/filter_options/domain/filter_options.dart';
 import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
@@ -21,7 +22,7 @@ class AddRegistrarServiceBottomSheet extends StatefulWidget {
     BuildContext context, {
     ServiceEntity? service,
   }) {
-    showModalBottomSheet(
+    CommonResponsiveModal.show<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -331,9 +332,11 @@ class _AddRegistrarServiceBottomSheetState
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: _categories.any(
-                                (option) => option.value == _selectedCategory,
-                              )
+                              value:
+                                  _categories.any(
+                                    (option) =>
+                                        option.value == _selectedCategory,
+                                  )
                                   ? _selectedCategory
                                   : null,
                               hint: const Text(

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../../core/style/font.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_circle_avatar.dart';
+import '../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../features/shared/notifications/presentation/notification_feed_sheet.dart';
 import '../../features/shared/notifications/presentation/notifications_cubit.dart';
@@ -44,7 +45,7 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           onPressed: () {
             final cubit = context.read<NotificationsCubit>();
-            showModalBottomSheet<void>(
+            CommonResponsiveModal.show<void>(
               context: context,
               isScrollControlled: true,
               builder: (_) => BlocProvider.value(

@@ -5,6 +5,7 @@ import '../../../../../../../core/di/injector.dart';
 import '../../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../../core/theme/app_colors.dart';
 import '../../../../../../../core/widgets/common_elevated_button.dart';
+import '../../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../../shared/appointment_schedules/domain/entities/appointment_schedule.dart';
 import '../../../../../../shared/appointments/domain/entities/appointment.dart';
 import '../../../../../../shared/appointments/presentation/bloc/appointment_bloc.dart';
@@ -371,12 +372,11 @@ Future<Appointment?> _openModal(
   DateTime selectedDay,
   List<AppointmentSchedule> schedules,
 ) {
-  return showModalBottomSheet<Appointment>(
+  return CommonResponsiveModal.show<Appointment>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.4),
-    showDragHandle: false,
     useSafeArea: true,
     builder: (_) => BlocProvider(
       create: (_) => getIt<AppointmentBloc>(),

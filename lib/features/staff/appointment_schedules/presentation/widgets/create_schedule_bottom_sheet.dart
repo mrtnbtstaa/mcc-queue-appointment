@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_bottom_sheet.dart';
+import '../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../shared/appointment_schedules/domain/entities/appointment_schedule.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
@@ -15,7 +16,7 @@ class CreateServiceSlotsBottomSheet extends StatefulWidget {
   static void showCreateServiceSlotsModal(BuildContext context) {
     final bloc = context.read<ManageSchedulesBloc>();
 
-    showModalBottomSheet(
+    CommonResponsiveModal.show<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
