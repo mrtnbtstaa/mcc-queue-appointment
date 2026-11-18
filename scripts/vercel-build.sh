@@ -9,6 +9,9 @@ archive="/tmp/flutter-linux-${flutter_version}.tar.xz"
 
 installed_flutter=""
 if command -v flutter >/dev/null 2>&1; then
+  installed_flutter_path="$(command -v flutter)"
+  installed_flutter_root="$(cd "$(dirname "$installed_flutter_path")/.." && pwd)"
+  git config --global --add safe.directory "$installed_flutter_root"
   installed_flutter="$(flutter --version 2>/dev/null | sed -n '1p' || true)"
 fi
 
@@ -18,6 +21,7 @@ if [[ "$installed_flutter" != "Flutter ${flutter_version} "* ]]; then
     --output "$archive"
   mkdir -p "$flutter_root"
   tar -xJf "$archive" -C "$flutter_root" --strip-components=1
+  git config --global --add safe.directory "$flutter_root"
   export PATH="$flutter_root/bin:$PATH"
 fi
 
