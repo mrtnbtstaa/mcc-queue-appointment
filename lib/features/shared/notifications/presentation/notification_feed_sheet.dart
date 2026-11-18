@@ -6,12 +6,14 @@ import '../../../../core/widgets/common_text.dart';
 import 'notifications_cubit.dart';
 
 class NotificationFeedSheet extends StatelessWidget {
-  const NotificationFeedSheet({super.key});
+  const NotificationFeedSheet({super.key, this.height});
+
+  final double? height;
 
   @override
   Widget build(BuildContext context) => SafeArea(
     child: SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.72,
+      height: height ?? MediaQuery.sizeOf(context).height * 0.72,
       child: BlocBuilder<NotificationsCubit, NotificationsState>(
         builder: (context, state) => Column(
           children: [
