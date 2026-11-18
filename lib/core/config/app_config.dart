@@ -14,7 +14,8 @@ class AppConfig {
   static const development = AppConfig(
     environment: AppEnvironment.development,
     appName: 'MyApp Development',
-    baseUrl: 'http://10.0.2.2:8000/api/',
+    baseUrl: 'http://localhost:60234/api/',
+    // baseUrl: 'http://10.0.2.2:8000/api/',
   );
 
   static const production = AppConfig(

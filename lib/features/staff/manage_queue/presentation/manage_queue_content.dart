@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/di/injector.dart';
-import '../../../../../../core/extensions/context_extension.dart';
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
 import '../../../../../../core/widgets/common_text.dart';
@@ -59,20 +58,21 @@ class ManageQueueContent extends StatelessWidget {
                       fontColor: TAppColors.errorIcon,
                     ),
                   ),
-                if (context.isDesktop)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 5, child: queue),
-                      20.0.width,
-                      Expanded(flex: 4, child: console),
-                    ],
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [console, 16.0.height, queue],
-                  ),
+                LayoutBuilder(
+                  builder: (context, constraints) => constraints.maxWidth >= 960
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 5, child: queue),
+                            20.0.width,
+                            Expanded(flex: 4, child: console),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [console, 16.0.height, queue],
+                        ),
+                ),
                 if (state.isLoadingMore)
                   const Padding(
                     padding: EdgeInsets.all(16),

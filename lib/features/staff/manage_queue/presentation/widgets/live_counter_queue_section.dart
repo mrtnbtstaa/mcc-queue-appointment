@@ -83,92 +83,110 @@ class LiveCounterQueueSection extends StatelessWidget {
           ),
         ),
         12.0.height,
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: list.length,
-          itemBuilder: (context, index) {
-            final item = list[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: TAppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border(
-                  left: BorderSide(
-                    color: item.isPriority
-                        ? TAppColors.warning
-                        : TAppColors.primary,
-                    width: 4,
+        if (list.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+            decoration: BoxDecoration(
+              color: TAppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: TAppColors.border),
+            ),
+            child: CommonText(
+              text: state.isLoading ? 'Loading queue…' : 'No queue entries.',
+              fontSize: 12,
+              fontColor: TAppColors.textHint,
+              alignment: TextAlign.center,
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final item = list[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: TAppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border(
+                    left: BorderSide(
+                      color: item.isPriority
+                          ? TAppColors.warning
+                          : TAppColors.primary,
+                      width: 4,
+                    ),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: TAppColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: CommonText(
-                      text: item.queueNumber,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontColor: TAppColors.primary,
-                    ),
-                  ),
-                  10.0.width,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CommonText(
-                          text: item.studentName.isEmpty
-                              ? 'Student'
-                              : item.studentName,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          maxLine: 1,
-                          textOverFlow: TextOverflow.ellipsis,
-                        ),
-                        2.0.height,
-                        CommonText(
-                          text: [
-                            if (item.studentId.isNotEmpty) item.studentId,
-                            if (item.serviceName.isNotEmpty) item.serviceName,
-                            if (item.slotSchedule.isNotEmpty) item.slotSchedule,
-                          ].join(' • '),
-                          fontSize: 11,
-                          fontColor: TAppColors.textHint,
-                          maxLine: 1,
-                          textOverFlow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (item.status == QueueStatus.waiting)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.call,
-                        size: 18,
-                        color: TAppColors.primary,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: TAppColors.background,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: () => bloc.add(QueueCallRequested(item.id)),
+                      child: CommonText(
+                        text: item.queueNumber,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontColor: TAppColors.primary,
+                      ),
                     ),
-                ],
-              ),
-            );
-          },
-        ),
+                    10.0.width,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CommonText(
+                            text: item.studentName.isEmpty
+                                ? 'Student'
+                                : item.studentName,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            maxLine: 1,
+                            textOverFlow: TextOverflow.ellipsis,
+                          ),
+                          2.0.height,
+                          CommonText(
+                            text: [
+                              if (item.studentId.isNotEmpty) item.studentId,
+                              if (item.serviceName.isNotEmpty) item.serviceName,
+                              if (item.slotSchedule.isNotEmpty)
+                                item.slotSchedule,
+                            ].join(' • '),
+                            fontSize: 11,
+                            fontColor: TAppColors.textHint,
+                            maxLine: 1,
+                            textOverFlow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (item.status == QueueStatus.waiting)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.call,
+                          size: 18,
+                          color: TAppColors.primary,
+                        ),
+                        onPressed: () => bloc.add(QueueCallRequested(item.id)),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
