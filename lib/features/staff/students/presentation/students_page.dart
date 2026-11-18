@@ -1,0 +1,93 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:material_ui/material_ui.dart';
+
+import '../../../../../../core/extensions/double_extension.dart';
+import '../../../../../../core/widgets/common_adaptive_grid.dart';
+import '../../../../../../core/widgets/common_page_body.dart';
+import 'cubit/students_cubit.dart';
+import 'cubit/students_state.dart';
+import 'widgets/official_access_banner.dart';
+import 'widgets/student_record_card.dart';
+import 'widgets/students_filter_section.dart';
+import 'widgets/students_header_stats.dart';
+
+class RegisteredStudentsWrapper extends StatelessWidget {
+  const RegisteredStudentsWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => GetIt.I<StudentsCubit>()..loadStudents(),
+      child: const RegisteredStudentsPage(),
+    );
+  }
+}
+
+class RegisteredStudentsPage extends StatelessWidget {
+  const RegisteredStudentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.extentAfter < 300) {
+          context.read<StudentsCubit>().loadMore();
+        }
+        return false;
+      },
+      child: CommonPageBody(
+        child: BlocBuilder<StudentsCubit, StudentsState>(
+          builder: (context, state) {
+            final list = state.filteredStudents;
+            if (state.isLoading && state.students.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state.error != null && state.students.isEmpty) {
+              return Center(child: Text(state.error!));
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const OfficialAccessBanner(),
+                16.0.height,
+                StudentsHeaderStats(count: state.students.length),
+                16.0.height,
+                const StudentsFilterSection(),
+                16.0.height,
+                if (list.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text('No students found.'),
+                    ),
+                  )
+                else ...[
+                  CommonAdaptiveGrid(
+                    minItemWidth: 480,
+                    maxColumns: 2,
+                    children: [
+                      for (final student in list)
+                        StudentRecordCard(student: student),
+                    ],
+                  ),
+                  if (state.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  if (state.error != null)
+                    TextButton(
+                      onPressed: context.read<StudentsCubit>().loadMore,
+                      child: Text(state.error!),
+                    ),
+                ],
+                20.0.height,
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
