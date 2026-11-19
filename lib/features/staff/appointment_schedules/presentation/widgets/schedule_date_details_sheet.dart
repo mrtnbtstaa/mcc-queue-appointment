@@ -4,16 +4,19 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../shared/appointment_schedules/domain/entities/appointment_schedule.dart';
+import 'create_schedule_bottom_sheet.dart';
 
 class ScheduleDateDetailsSheet extends StatelessWidget {
   const ScheduleDateDetailsSheet({
     super.key,
     required this.date,
     required this.schedules,
+    required this.onEdit,
   });
 
   final DateTime date;
   final List<AppointmentSchedule> schedules;
+  final ValueChanged<AppointmentSchedule> onEdit;
 
   static Future<void> show(
     BuildContext context,
@@ -24,7 +27,14 @@ class ScheduleDateDetailsSheet extends StatelessWidget {
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     maxWidth: 560,
-    builder: (_) => ScheduleDateDetailsSheet(date: date, schedules: schedules),
+    builder: (_) => ScheduleDateDetailsSheet(
+      date: date,
+      schedules: schedules,
+      onEdit: (schedule) {
+        Navigator.of(context).pop();
+        CreateServiceSlotsBottomSheet.showEditScheduleModal(context, schedule);
+      },
+    ),
   );
 
   @override
@@ -82,8 +92,10 @@ class ScheduleDateDetailsSheet extends StatelessWidget {
                 shrinkWrap: true,
                 itemCount: schedules.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (context, index) =>
-                    _ScheduleEventCard(schedule: schedules[index]),
+                itemBuilder: (context, index) => _ScheduleEventCard(
+                  schedule: schedules[index],
+                  onEdit: onEdit,
+                ),
               ),
             ),
           ],
@@ -94,9 +106,10 @@ class ScheduleDateDetailsSheet extends StatelessWidget {
 }
 
 class _ScheduleEventCard extends StatelessWidget {
-  const _ScheduleEventCard({required this.schedule});
+  const _ScheduleEventCard({required this.schedule, required this.onEdit});
 
   final AppointmentSchedule schedule;
+  final ValueChanged<AppointmentSchedule> onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +183,15 @@ class _ScheduleEventCard extends StatelessWidget {
           Text(
             'Capacity: $remaining of ${schedule.capacity} spots available',
             style: const TextStyle(color: TAppColors.textMuted, fontSize: 11),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () => onEdit(schedule),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: const Text('Edit'),
+            ),
           ),
         ],
       ),

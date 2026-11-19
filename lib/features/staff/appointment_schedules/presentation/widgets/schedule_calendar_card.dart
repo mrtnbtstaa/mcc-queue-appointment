@@ -60,6 +60,9 @@ class ScheduleCalendarCard extends StatelessWidget {
                 currentDay: DateTime.now(),
                 calendarFormat: CalendarFormat.month,
                 headerVisible: false,
+                enabledDayPredicate: (day) =>
+                    isSameDay(day, DateTime.now()) ||
+                    day.isAfter(DateTime.now()),
                 eventLoader: (day) {
                   return state.schedulesFor(day);
                 },
@@ -72,6 +75,10 @@ class ScheduleCalendarCard extends StatelessWidget {
                   ),
                   weekendTextStyle: const TextStyle(
                     color: TAppColors.textPrimary,
+                    fontSize: 12,
+                  ),
+                  disabledTextStyle: const TextStyle(
+                    color: TAppColors.textHint,
                     fontSize: 12,
                   ),
                   selectedDecoration: const BoxDecoration(

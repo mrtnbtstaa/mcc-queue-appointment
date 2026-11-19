@@ -179,7 +179,7 @@ class _TimeSlotCard extends StatelessWidget {
                             textOverFlow: TextOverflow.ellipsis,
                           ),
                           CommonText(
-                            text: slot.service,
+                            text: slot.serviceName,
                             fontColor: TAppColors.textMuted,
                             fontSize: 11,
                             maxLine: 2,

@@ -31,18 +31,18 @@ class AppointmentScheduleModel extends AppointmentSchedule {
 
   Map<String, dynamic> toJson() {
     return {
-      'service': service,
+      'service': serviceName,
       'appointment_date': _appointmentDate,
       'start_time': startTime,
       'end_time': endTime,
       'capacity': capacity,
       'status': status,
-      "service_name": serviceName,
     };
   }
 
+  // The API binds service by name (slug_field="name"), not by PK.
   Map<String, dynamic> toUpdateJson() => {
-    'service': service,
+    'service': serviceName,
     'appointment_date': _appointmentDate,
     'start_time': startTime,
     'end_time': endTime,

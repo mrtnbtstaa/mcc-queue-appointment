@@ -50,13 +50,13 @@ class CreateServiceSlotsBottomSheetState
   late String _selectedServiceID = widget.schedule?.serviceName ?? '';
 
   final TextEditingController _dateController = TextEditingController(
-    text: 'Oct 1, 2026',
+    text: DateFormat('MMM d, yyyy').format(DateTime.now()),
   );
   final TextEditingController _startTimeController = TextEditingController(
-    text: '08:00 AM',
+    text: '08:00',
   );
   final TextEditingController _endTimeController = TextEditingController(
-    text: '05:00 PM',
+    text: '17:00',
   );
   final TextEditingController _capacityController = TextEditingController(
     text: '10',
@@ -260,10 +260,14 @@ class CreateServiceSlotsBottomSheetState
                       controller: _dateController,
                       readOnly: true,
                       onTap: () async {
+                        final today = DateUtils.dateOnly(DateTime.now());
+                        final initialDate = widget.schedule?.date ?? today;
                         final selectedDate = await showDatePicker(
                           context: context,
-                          initialDate: widget.schedule?.date ?? DateTime.now(),
-                          firstDate: DateTime(2020),
+                          initialDate: initialDate.isBefore(today)
+                              ? today
+                              : initialDate,
+                          firstDate: today,
                           lastDate: DateTime(2100),
                         );
 
