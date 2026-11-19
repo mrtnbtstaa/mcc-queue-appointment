@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import '../extensions/context_extension.dart';
 import '../../../../../../core/style/font.dart';
 import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../core/widgets/common_circle_avatar.dart';
 import '../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../features/shared/notifications/presentation/notification_feed_sheet.dart';
@@ -134,18 +133,6 @@ class CommonHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                 ],
               ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: CommonCircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white24,
-            child: const Icon(
-              Icons.person,
-              color: TAppColors.surface,
-              size: 20,
             ),
           ),
         ),
