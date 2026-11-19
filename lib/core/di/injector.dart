@@ -51,6 +51,7 @@ import '../../features/shared/profile/domain/usecases/get_my_profile.dart';
 import '../../features/shared/profile/domain/usecases/get_user.dart';
 import '../../features/shared/profile/domain/usecases/get_users.dart';
 import '../../features/shared/profile/domain/usecases/update_my_profile.dart';
+import '../../features/shared/profile/domain/usecases/update_user.dart';
 import '../../features/shared/profile/presentation/cubit/profile_cubit.dart';
 import '../../features/shared/queue/data/datasources/queue_remote_data_source.dart';
 import '../../features/shared/queue/data/datasources/queue_remote_data_source_impl.dart';
@@ -325,6 +326,9 @@ void profileDependencies() {
   );
   getIt.registerLazySingleton<UpdateMyProfile>(
     () => UpdateMyProfile(getIt<ProfileRepository>()),
+  );
+  getIt.registerLazySingleton<UpdateUser>(
+    () => UpdateUser(getIt<ProfileRepository>()),
   );
   getIt.registerLazySingleton<ChangePassword>(
     () => ChangePassword(getIt<ProfileRepository>()),

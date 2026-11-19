@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../../core/widgets/common_empty_state.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/common_text.dart';
 import 'notifications_cubit.dart';
@@ -62,7 +64,11 @@ class NotificationFeedSheet extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               child: state.items.isEmpty
-                  ? const Center(child: Text('No unread notifications.'))
+                  ? const CommonEmptyState(
+                      title: 'You’re all caught up',
+                      message: 'New notifications will appear here.',
+                      illustrationHeight: 140,
+                    )
                   : ListView.separated(
                       itemCount: state.items.length,
                       separatorBuilder: (_, _) => const Divider(height: 1),

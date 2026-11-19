@@ -6,6 +6,7 @@ import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_adaptive_grid.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
 import '../../../../../../core/widgets/common_text.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../core/di/injector.dart';
 import '../../../shared/services/presentation/bloc/manage_services_bloc.dart';
 import '../../../shared/services/presentation/bloc/manage_services_event.dart';
@@ -100,12 +101,9 @@ class ManageServicesContent extends StatelessWidget {
                 final services = state.filteredServices;
 
                 if (services.isEmpty) {
-                  return _StatusBox(
-                    child: CommonText(
-                      text: 'No registrar services match your filter.',
-                      fontColor: TAppColors.textMuted,
-                      fontSize: 13,
-                    ),
+                  return const CommonEmptyState(
+                    title: 'No services found',
+                    message: 'Try changing your search or service filters.',
                   );
                 }
 

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../../../shared/queue/domain/entities/queue_entity.dart';
@@ -72,21 +73,13 @@ class LiveCounterQueueSection extends StatelessWidget {
         ),
         12.0.height,
         if (list.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-            decoration: BoxDecoration(
-              color: TAppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: TAppColors.border),
-            ),
-            child: CommonText(
-              text: state.isLoading ? 'Loading queue…' : 'No queue entries.',
-              fontSize: 12,
-              fontColor: TAppColors.textHint,
-              alignment: TextAlign.center,
-            ),
-          )
+          state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : const CommonEmptyState(
+                  title: 'No queue entries',
+                  message: 'Queue entries will appear here when students join.',
+                  illustrationHeight: 110,
+                )
         else
           ListView.builder(
             shrinkWrap: true,

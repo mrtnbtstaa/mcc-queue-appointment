@@ -24,6 +24,16 @@ abstract interface class ProfileRemoteDataSource {
     required bool isActive,
   });
 
+  Future<ApiResult<ProfileEntity>> updateUser({
+    required String id,
+    required String name,
+    required String studentId,
+    required String email,
+    required String course,
+    required String yearLevel,
+    required bool isActive,
+  });
+
   Future<ApiResult<void>> changePassword({
     required String currentPassword,
     required String newPassword,

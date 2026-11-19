@@ -21,6 +21,16 @@ abstract interface class ProfileRepository {
     required bool isActive,
   });
 
+  ResultFuture<ProfileEntity> updateUser({
+    required String id,
+    required String name,
+    required String studentId,
+    required String email,
+    required String course,
+    required String yearLevel,
+    required bool isActive,
+  });
+
   ResultFuture<void> changePassword({
     required String currentPassword,
     required String newPassword,

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/widgets/common_adaptive_grid.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
 import 'cubit/students_cubit.dart';
 import 'cubit/students_state.dart';
@@ -60,11 +61,9 @@ class RegisteredStudentsPage extends StatelessWidget {
                     ),
                   )
                 else if (list.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('No students found.'),
-                    ),
+                  const CommonEmptyState(
+                    title: 'No students found',
+                    message: 'Try changing your search or course filter.',
                   )
                 else ...[
                   CommonAdaptiveGrid(

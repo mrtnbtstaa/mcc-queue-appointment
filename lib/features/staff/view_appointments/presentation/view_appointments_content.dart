@@ -5,6 +5,7 @@ import '../../../../core/di/injector.dart';
 import '../../../../core/extensions/double_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/common_adaptive_grid.dart';
+import '../../../../core/widgets/common_empty_state.dart';
 import '../../../../core/widgets/common_page_body.dart';
 import '../../../../core/widgets/common_text.dart';
 import 'cubit/view_appointments_cubit.dart';
@@ -102,12 +103,9 @@ class ViewAppointmentsContent extends StatelessWidget {
                       8.0.height,
                     ],
                     if (state.appointments.isEmpty)
-                      _StatusBox(
-                        child: CommonText(
-                          text: 'No appointments match your filter.',
-                          fontColor: TAppColors.textMuted,
-                          fontSize: 13,
-                        ),
+                      const CommonEmptyState(
+                        title: 'No appointments found',
+                        message: 'Try changing the appointment filters.',
                       )
                     else
                       CommonAdaptiveGrid(

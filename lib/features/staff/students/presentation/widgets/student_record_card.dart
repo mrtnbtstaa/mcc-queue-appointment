@@ -1,3 +1,4 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -6,6 +7,7 @@ import '../../../../../../core/router/app_routes.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_text.dart';
 import '../../../../shared/profile/domain/entities/profile_entity.dart';
+import '../cubit/students_cubit.dart';
 
 class StudentRecordCard extends StatelessWidget {
   final ProfileEntity student;
@@ -19,10 +21,15 @@ class StudentRecordCard extends StatelessWidget {
       if (student.yearLevel.isNotEmpty) 'Year ${student.yearLevel}',
     ].join(' • ');
     return InkWell(
-      onTap: () => context.pushNamed(
-        AppRoutes.staffStudentDetailName,
-        pathParameters: {'id': student.id},
-      ),
+      onTap: () async {
+        await context.pushNamed(
+          AppRoutes.staffStudentDetailName,
+          pathParameters: {'id': student.id},
+        );
+        if (context.mounted) {
+          context.read<StudentsCubit>().loadStudents(clearStudents: true);
+        }
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),

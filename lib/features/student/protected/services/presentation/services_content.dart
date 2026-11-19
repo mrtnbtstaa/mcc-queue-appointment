@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/widgets/common_adaptive_grid.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../../core/widgets/common_page_body.dart';
 import '../../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../core/di/injector.dart';
@@ -95,17 +96,9 @@ class ServicesContent extends StatelessWidget {
                 }
 
                 if (state.services.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
-                    child: Center(
-                      child: Text(
-                        'No services found for this filter.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: TAppColors.textMuted,
-                        ),
-                      ),
-                    ),
+                  return const CommonEmptyState(
+                    title: 'No services found',
+                    message: 'Try changing your search or selected category.',
                   );
                 }
 

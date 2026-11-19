@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../../core/theme/app_colors.dart';
 import '../../../../../../../core/widgets/common_adaptive_grid.dart';
+import '../../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../../shared/appointments/domain/entities/appointment.dart';
 import '../../../../../../shared/appointments/presentation/bloc/appointment_bloc.dart';
 import '../../../../../../shared/appointments/presentation/bloc/appointment_event.dart';
@@ -51,23 +52,10 @@ class StudentAppointmentsList extends StatelessWidget {
     );
   }
 
-  Widget _emptyState() => Container(
-    padding: const EdgeInsets.all(24),
-    decoration: BoxDecoration(
-      color: TAppColors.surface,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: TAppColors.border),
-    ),
-    child: const Column(
-      children: [
-        Icon(Icons.event_busy_outlined, color: TAppColors.textHint, size: 28),
-        SizedBox(height: 8),
-        Text(
-          'No appointments yet.',
-          style: TextStyle(color: TAppColors.textMuted, fontSize: 13),
-        ),
-      ],
-    ),
+  Widget _emptyState() => const CommonEmptyState(
+    title: 'No appointments yet',
+    message: 'Appointments you book will appear here.',
+    illustrationHeight: 120,
   );
 
   Widget _loadError(BuildContext context, String message) => Container(

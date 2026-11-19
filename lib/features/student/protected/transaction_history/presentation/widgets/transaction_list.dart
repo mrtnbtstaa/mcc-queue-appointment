@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
-import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../shared/transaction_history/presentation/cubit/transaction_cubit.dart';
 import '../../../../../shared/transaction_history/presentation/cubit/transaction_state.dart';
 import 'transaction_detail_bottom_sheet.dart';
@@ -26,14 +26,9 @@ class TransactionList extends StatelessWidget {
         }
         final transactions = state.filteredTransactions;
         if (transactions.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(
-              child: Text(
-                'No services found for this filter.',
-                style: TextStyle(fontSize: 13, color: TAppColors.textMuted),
-              ),
-            ),
+          return const CommonEmptyState(
+            title: 'No transactions yet',
+            message: 'Transactions that match this filter will appear here.',
           );
         }
         return Column(

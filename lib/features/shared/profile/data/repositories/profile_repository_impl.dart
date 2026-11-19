@@ -83,6 +83,31 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  ResultFuture<ProfileEntity> updateUser({
+    required String id,
+    required String name,
+    required String studentId,
+    required String email,
+    required String course,
+    required String yearLevel,
+    required bool isActive,
+  }) async {
+    final result = await remoteDataSource.updateUser(
+      id: id,
+      name: name,
+      studentId: studentId,
+      email: email,
+      course: course,
+      yearLevel: yearLevel,
+      isActive: isActive,
+    );
+    return switch (result) {
+      ApiSuccess<ProfileEntity>(:final data) => Right(data),
+      ApiFailure(:final error) => Left(ServerFailure(error.message)),
+    };
+  }
+
+  @override
   ResultFuture<void> changePassword({
     required String currentPassword,
     required String newPassword,

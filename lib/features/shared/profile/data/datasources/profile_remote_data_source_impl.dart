@@ -94,6 +94,34 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   );
 
   @override
+  Future<ApiResult<ProfileEntity>> updateUser({
+    required String id,
+    required String name,
+    required String studentId,
+    required String email,
+    required String course,
+    required String yearLevel,
+    required bool isActive,
+  }) async {
+    final result = await apiClient.patch<void>(
+      'v1/users/$id/',
+      body: {
+        'name': name,
+        'student_id': studentId,
+        'email': email,
+        'course': course,
+        'year_level': yearLevel,
+        'is_active': isActive,
+      },
+      decode: (_) {},
+    );
+    return switch (result) {
+      ApiSuccess<void>() => getUser(id),
+      ApiFailure<void>(:final error) => ApiFailure(error),
+    };
+  }
+
+  @override
   Future<ApiResult<void>> changePassword({
     required String currentPassword,
     required String newPassword,

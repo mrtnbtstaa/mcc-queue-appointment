@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../core/extensions/double_extension.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_elevated_button.dart';
+import '../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../core/widgets/common_text.dart';
 import '../../../../shared/appointment_schedules/domain/entities/appointment_schedule.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
@@ -84,20 +85,11 @@ class DailyTimeSlotsList extends StatelessWidget {
             12.0.height,
 
             if (schedules.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: TAppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: TAppColors.border),
-                ),
-                child: Center(
-                  child: CommonText(
-                    text: 'No schedules available',
-                    fontColor: TAppColors.textMuted,
-                  ),
-                ),
+              const CommonEmptyState(
+                title: 'No schedules available',
+                message:
+                    'Choose another date or create a schedule for this day.',
+                illustrationHeight: 110,
               )
             else
               Column(

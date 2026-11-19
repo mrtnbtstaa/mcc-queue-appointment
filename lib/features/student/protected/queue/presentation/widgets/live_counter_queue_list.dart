@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../../core/widgets/common_empty_state.dart';
 import '../../../../../shared/queue/domain/entities/queue_entity.dart';
 import 'live_counter_queue_header.dart';
 import 'queue_item.dart';
@@ -42,9 +43,10 @@ class LiveCounterQueueList extends StatelessWidget {
             ],
           ),
           child: activeQueues.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text('No active queues.'),
+              ? const CommonEmptyState(
+                  title: 'No active queues',
+                  message: 'Your queue will appear here after you join.',
+                  illustrationHeight: 110,
                 )
               : Column(
                   children: [
