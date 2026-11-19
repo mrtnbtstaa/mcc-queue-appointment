@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,7 +15,7 @@ Future<void> main() async {
 
   const environment = String.fromEnvironment(
     "ENV",
-    defaultValue: "development",
+    defaultValue: kReleaseMode ? "production" : "development",
   );
 
   final config = switch (environment) {
