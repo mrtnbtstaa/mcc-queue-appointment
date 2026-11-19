@@ -265,7 +265,7 @@ class AppointmentTicketCard extends StatelessWidget {
                       8.0.width,
                       Expanded(
                         child: CommonText(
-                          text: 'Please arrive at least 15 minutes before your scheduled window. Present your MCC Student ID and this digital ticket to the kiosk scanner or Window 2 staff.',
+                          text: 'Please arrive at least 15 minutes before your scheduled window. Present your MCC Student ID.',
                           fontColor: TAppColors.textSecondary,
                           fontSize: 11,
                           height: 1.35,

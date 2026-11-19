@@ -79,7 +79,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
     final result = await _remote.createService(dto);
 
     return switch (result) {
-      ApiSuccess(:final data) => Right(data.toDomain()),
+      ApiSuccess() => Right(entity),
       ApiFailure(:final error) => Left(_mapFailure(error)),
     };
   }

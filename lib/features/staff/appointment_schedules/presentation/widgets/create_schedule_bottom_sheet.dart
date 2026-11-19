@@ -515,6 +515,23 @@ class CreateServiceSlotsBottomSheetState
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
+                              final date = DateFormat("MMM d, yyyy")
+                                  .parse(_dateController.text);
+                              if (context
+                                  .read<ManageSchedulesBloc>()
+                                  .state
+                                  .schedulesFor(date)
+                                  .isNotEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'A schedule already exists for this date.',
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
                               context.read<ManageSchedulesBloc>().add(
                                 CreateSchedule(
                                   AppointmentSchedule(
@@ -522,8 +539,7 @@ class CreateServiceSlotsBottomSheetState
                                     status: 'AVAILABLE',
                                     startTime: _startTimeController.text,
                                     endTime: _endTimeController.text,
-                                    date: DateFormat("MMM d, yyyy")
-                                        .parse(_dateController.text),
+                                    date: date,
                                     capacity:
                                         int.tryParse(
                                           _capacityController.text,

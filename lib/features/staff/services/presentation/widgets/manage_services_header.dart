@@ -83,7 +83,7 @@ class ManageServicesHeader extends StatelessWidget {
               8.0.width,
               Expanded(
                 child: CommonText(
-                  text: 'Deactivating a service immediately hides it from the student booking catalog and kiosk displays.',
+                  text: 'Deactivating a service immediately hides it from the student booking catalog.',
                   fontColor: TAppColors.textSecondary,
                   fontSize: 11.5,
                   height: 1.35,

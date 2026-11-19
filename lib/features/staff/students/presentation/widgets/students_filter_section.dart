@@ -86,7 +86,6 @@ class StudentsFilterSection extends StatelessWidget {
                   10.0.height,
                   Wrap(
                     spacing: 8,
-                    runSpacing: 8,
                     children: [
                       _buildProgramChip(cubit, state, null, 'All'),
                       for (final course in courses)
@@ -127,7 +126,6 @@ class StudentsFilterSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       labelPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       label: CommonText(
         text: label,
         fontSize: 12,

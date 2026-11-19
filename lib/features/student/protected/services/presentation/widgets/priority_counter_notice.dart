@@ -35,7 +35,7 @@ class PriorityCounterNotice extends StatelessWidget {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Appointments bypass walk-in kiosk delays. Review document prerequisites before booking.',
+                  'Review document prerequisites before booking.',
                   style: TextStyle(fontSize: 11, color: TAppColors.errorText),
                 ),
               ],

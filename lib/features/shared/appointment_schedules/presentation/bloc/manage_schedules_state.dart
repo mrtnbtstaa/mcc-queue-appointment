@@ -33,6 +33,15 @@ class ManageSchedulesState extends Equatable {
     this.errorMessage,
   });
 
+  List<AppointmentSchedule> schedulesFor(DateTime date) => schedules
+      .where(
+        (schedule) =>
+            schedule.date.year == date.year &&
+            schedule.date.month == date.month &&
+            schedule.date.day == date.day,
+      )
+      .toList();
+
   ManageSchedulesState copyWith({
     ManageSchedulesStatus? status,
     String? selectedServiceScope,

@@ -6,12 +6,22 @@ import '../../../../../core/widgets/common_bottom_sheet.dart';
 import '../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../../core/widgets/common_elevated_button.dart';
 import '../../../../shared/filter_options/domain/filter_options.dart';
-import '../../../../shared/filter_options/presentation/filter_options_cubit.dart';
 import '../../../../shared/services/domain/entities/service_entity.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_bloc.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_event.dart';
 import '../../../../shared/services/presentation/bloc/manage_services_state.dart';
 import 'required_document_field.dart';
+
+const _serviceCategories = [
+  FilterOption(value: 'Admission', label: 'Admission'),
+  FilterOption(value: 'Enrollment', label: 'Enrollment'),
+  FilterOption(value: 'Records', label: 'Student Records'),
+  FilterOption(value: 'Certificates', label: 'Certificates & Documents'),
+  FilterOption(value: 'Academic', label: 'Academic Concerns'),
+  FilterOption(value: 'Graduation', label: 'Graduation'),
+  FilterOption(value: 'Clearance', label: 'Clearance'),
+  FilterOption(value: 'Transfer', label: 'Transfer & Withdrawal'),
+];
 
 class AddRegistrarServiceBottomSheet extends StatefulWidget {
   const AddRegistrarServiceBottomSheet({super.key, this.serviceToEdit});
@@ -70,23 +80,18 @@ class _AddRegistrarServiceBottomSheetState
 
     // Keep the saved category selectable even if it isn't in the backend list.
     final existing = service?.category;
-    final options = context
-        .read<FilterOptionsCubit>()
-        .state
-        .options
-        .serviceCategories;
     _categories = [
-      ...options,
+      ..._serviceCategories,
       if (existing != null &&
           existing.isNotEmpty &&
-          !options.any((option) => option.value == existing))
+          !_serviceCategories.any((option) => option.value == existing))
         FilterOption(value: existing, label: existing),
     ];
     _selectedCategory =
         (existing != null &&
             _categories.any((option) => option.value == existing))
         ? existing
-        : (_categories.isEmpty ? '' : _categories.first.value);
+        : '';
 
     _isActiveForBooking = service?.isActive ?? true;
 
@@ -203,6 +208,54 @@ class _AddRegistrarServiceBottomSheetState
     );
   }
 
+  Widget _categoryDropdown({required bool useAsServiceName}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: TAppColors.inputFill,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: TAppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _categories.any((option) => option.value == _selectedCategory)
+              ? _selectedCategory
+              : null,
+          hint: Text(
+            useAsServiceName ? 'Select service name' : 'Select category',
+            style: const TextStyle(fontSize: 13, color: TAppColors.textHint),
+          ),
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: TAppColors.textSecondary,
+            size: 20,
+          ),
+          style: const TextStyle(fontSize: 13, color: TAppColors.textPrimary),
+          items: _categories
+              .map(
+                (option) => DropdownMenuItem<String>(
+                  value: option.value,
+                  child: Text(option.label),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() {
+              _selectedCategory = value;
+              if (useAsServiceName) {
+                _serviceNameController.text = _categories
+                    .firstWhere((option) => option.value == value)
+                    .label;
+              }
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ManageServicesBloc, ManageServicesState>(
@@ -308,71 +361,28 @@ class _AddRegistrarServiceBottomSheetState
                         // Service Name
                         _label('Service Name'),
                         const SizedBox(height: 6),
-                        TextField(
-                          controller: _serviceNameController,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: TAppColors.textPrimary,
-                          ),
-                          decoration: _inputDecoration(
-                            hint: 'e.g., Certificate of Enrollment',
-                          ),
-                        ),
+                        if (_isEditing)
+                          TextField(
+                            controller: _serviceNameController,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: TAppColors.textPrimary,
+                            ),
+                            decoration: _inputDecoration(
+                              hint: 'e.g., Certificate of Enrollment',
+                            ),
+                          )
+                        else
+                          _categoryDropdown(useAsServiceName: true),
                         const SizedBox(height: 14),
 
                         // Category Classification
-                        _label('Category Classification'),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          decoration: BoxDecoration(
-                            color: TAppColors.inputFill,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: TAppColors.border),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value:
-                                  _categories.any(
-                                    (option) =>
-                                        option.value == _selectedCategory,
-                                  )
-                                  ? _selectedCategory
-                                  : null,
-                              hint: const Text(
-                                'Select category',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: TAppColors.textHint,
-                                ),
-                              ),
-                              isExpanded: true,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: TAppColors.textSecondary,
-                                size: 20,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: TAppColors.textPrimary,
-                              ),
-                              items: _categories
-                                  .map(
-                                    (option) => DropdownMenuItem<String>(
-                                      value: option.value,
-                                      child: Text(option.label),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() => _selectedCategory = newValue);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
+                        if (_isEditing) ...[
+                          _label('Category Classification'),
+                          const SizedBox(height: 6),
+                          _categoryDropdown(useAsServiceName: false),
+                          const SizedBox(height: 14),
+                        ],
 
                         // Service Fee
                         _label('Service Fee (₱)'),
@@ -490,36 +500,39 @@ class _AddRegistrarServiceBottomSheetState
                         const SizedBox(height: 20),
 
                         // Submit / Save Button
-                        CommonElevatedButton(
-                          // style: ElevatedButton.styleFrom(
-                          //   backgroundColor: TAppColors.primary,
-                          //   padding: const EdgeInsets.symmetric(vertical: 14),
-                          //   shape: RoundedRectangleBorder(
-                          //     borderRadius: BorderRadius.circular(12),
-                          //   ),
-                          // ),
-                          onButtonPressed: _isSubmitting
-                              ? null
-                              : () => _submitForm(context),
-                          custom: _isSubmitting
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: TAppColors.surface,
+                        SizedBox(
+                          width: double.infinity,
+                          child: CommonElevatedButton(
+                            // style: ElevatedButton.styleFrom(
+                            //   backgroundColor: TAppColors.primary,
+                            //   padding: const EdgeInsets.symmetric(vertical: 14),
+                            //   shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(12),
+                            //   ),
+                            // ),
+                            onButtonPressed: _isSubmitting
+                                ? null
+                                : () => _submitForm(context),
+                            custom: _isSubmitting
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: TAppColors.surface,
+                                    ),
+                                  )
+                                : Text(
+                                    _isEditing
+                                        ? 'Save Changes'
+                                        : 'Create Registrar Service',
+                                    style: const TextStyle(
+                                      color: TAppColors.surface,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  _isEditing
-                                      ? 'Save Changes'
-                                      : 'Create Registrar Service',
-                                  style: const TextStyle(
-                                    color: TAppColors.surface,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                          ),
                         ),
                         const SizedBox(height: 12),
                       ],

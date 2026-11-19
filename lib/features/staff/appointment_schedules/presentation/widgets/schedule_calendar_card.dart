@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../../../../core/extensions/double_extension.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/widgets/common_text.dart';
+import 'schedule_date_details_sheet.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_state.dart';
@@ -59,11 +60,7 @@ class ScheduleCalendarCard extends StatelessWidget {
                 calendarFormat: CalendarFormat.month,
                 headerVisible: false,
                 eventLoader: (day) {
-                  return state.schedules.where((schedule) {
-                    return schedule.date.year == day.year &&
-                        schedule.date.month == day.month &&
-                        schedule.date.day == day.day;
-                  }).toList();
+                  return state.schedulesFor(day);
                 },
 
                 calendarStyle: CalendarStyle(
@@ -104,6 +101,10 @@ class ScheduleCalendarCard extends StatelessWidget {
                   context.read<ManageSchedulesBloc>().add(
                     SelectDate(selectedDay),
                   );
+                  final events = state.schedulesFor(selectedDay);
+                  if (events.isNotEmpty) {
+                    ScheduleDateDetailsSheet.show(context, selectedDay, events);
+                  }
                 },
 
                 onPageChanged: (focusedDay) {

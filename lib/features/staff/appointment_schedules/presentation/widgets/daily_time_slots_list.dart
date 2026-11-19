@@ -31,7 +31,8 @@ class DailyTimeSlotsList extends StatelessWidget {
           );
         }
 
-        final totalCapacity = state.schedules.fold<int>(
+        final schedules = state.schedulesFor(state.selectedDate);
+        final totalCapacity = schedules.fold<int>(
           0,
           (sum, schedule) => sum + schedule.capacity,
         );
@@ -56,7 +57,7 @@ class DailyTimeSlotsList extends StatelessWidget {
                       2.0.height,
                       CommonText(
                         text:
-                            '${state.schedules.length} Operating windows configured • $totalCapacity student capacity',
+                            '${schedules.length} Operating windows configured • $totalCapacity student capacity',
                         fontColor: TAppColors.textMuted,
                         fontSize: 11,
                       ),
@@ -82,7 +83,7 @@ class DailyTimeSlotsList extends StatelessWidget {
 
             12.0.height,
 
-            if (state.schedules.isEmpty)
+            if (schedules.isEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -100,7 +101,7 @@ class DailyTimeSlotsList extends StatelessWidget {
               )
             else
               Column(
-                children: state.schedules.map((slot) {
+                children: schedules.map((slot) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _TimeSlotCard(slot: slot),

@@ -76,16 +76,13 @@ class ServiceRemoteDataSource {
     );
   }
 
-  Future<ApiResult<ServiceDto>> createService(ServiceDto dto) async {
-    return _client.post<ServiceDto>(
+  Future<ApiResult<void>> createService(ServiceDto dto) async {
+    return _client.post<void>(
       'v1/document-services/',
       body: dto.toJson(),
       requireAuth: true,
       isIdempotent: false,
-      decode: (json) {
-        final body = json as Map<String, dynamic>;
-        return ServiceDto.fromJson(body['data'] as Map<String, dynamic>);
-      },
+      decode: (_) {},
     );
   }
 

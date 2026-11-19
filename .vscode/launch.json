@@ -5,6 +5,17 @@
             "name": "Development",
             "request": "launch",
             "type": "dart",
+            "deviceId": "emulator-5554",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=ENV=development"
+            ]
+        },
+        {
+            "name": "Development 1",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-5554",
             "program": "lib/main.dart",
             "args": [
                 "--dart-define=ENV=development"
