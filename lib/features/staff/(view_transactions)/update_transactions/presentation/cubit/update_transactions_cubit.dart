@@ -50,11 +50,7 @@ class UpdateTransactionCubit extends Cubit<UpdateTransactionState> {
     final result = await setTransactionStatus(
       SetTransactionStatusParams(
         id: transactionId,
-        status: switch (state.selectedStatus) {
-          'Completed' => 'COMPLETED',
-          'Cancelled' => 'CANCELLED',
-          _ => 'PROCESSING',
-        },
+        status: state.selectedStatus,
         remarks: state.remarksText,
       ),
     );

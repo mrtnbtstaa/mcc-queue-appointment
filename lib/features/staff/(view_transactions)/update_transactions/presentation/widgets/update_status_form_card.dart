@@ -90,17 +90,17 @@ class UpdateStatusFormCard extends StatelessWidget {
                         child: DropdownButton<String>(
                           value: state.selectedStatus,
                           items:
-                              [
-                                    'Ready for Release',
-                                    'In Progress',
-                                    'Completed',
-                                    'Cancelled',
+                              const [
+                                    ('PENDING', 'Pending'),
+                                    ('PROCESSING', 'Processing'),
+                                    ('COMPLETED', 'Completed'),
+                                    ('CANCELLED', 'Cancelled'),
                                   ]
                                   .map(
-                                    (val) => DropdownMenuItem(
-                                      value: val,
+                                    (status) => DropdownMenuItem(
+                                      value: status.$1,
                                       child: CommonText(
-                                        text: val,
+                                        text: status.$2,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -118,7 +118,7 @@ class UpdateStatusFormCard extends StatelessWidget {
               ),
               4.0.height,
               CommonText(
-                text: 'Setting this to Ready will prepare claim documents and alert the applicant.',
+                text: 'Select the transaction status that matches its current processing stage.',
                 fontSize: 10,
                 fontColor: TAppColors.textHint,
               ),

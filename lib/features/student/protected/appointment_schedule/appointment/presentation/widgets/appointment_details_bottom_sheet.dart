@@ -17,10 +17,12 @@ class AppointmentDetailsModal extends StatelessWidget {
     super.key,
     required this.selectedDay,
     required this.schedules,
+    required this.bookedSlotIds,
   });
 
   final DateTime selectedDay;
   final List<AppointmentSchedule> schedules;
+  final Set<String> bookedSlotIds;
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +151,7 @@ class AppointmentDetailsModal extends StatelessWidget {
                         return _AppointmentCard(
                           schedule: schedule,
                           isLoading: isLoading,
+                          isAlreadyBooked: bookedSlotIds.contains(schedule.id),
                         );
                       },
                     ),
@@ -182,10 +185,15 @@ class AppointmentDetailsModal extends StatelessWidget {
 
 /// A single appointment row inside the modal.
 class _AppointmentCard extends StatelessWidget {
-  const _AppointmentCard({required this.schedule, required this.isLoading});
+  const _AppointmentCard({
+    required this.schedule,
+    required this.isLoading,
+    required this.isAlreadyBooked,
+  });
 
   final AppointmentSchedule schedule;
   final bool isLoading;
+  final bool isAlreadyBooked;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +204,9 @@ class _AppointmentCard extends StatelessWidget {
     final isAvailable =
         !isFull && !isInactive && (status == 'AVAILABLE' || status == 'OPEN');
 
-    final statusLabel = isFull
+    final statusLabel = isAlreadyBooked
+        ? 'Already booked'
+        : isFull
         ? 'Full'
         : isInactive
         ? 'Inactive'
@@ -207,6 +217,7 @@ class _AppointmentCard extends StatelessWidget {
     final slotId = schedule.id;
     final canBook =
         isAvailable &&
+        !isAlreadyBooked &&
         !isLoading &&
         slotId != null &&
         slotId.isNotEmpty &&
@@ -214,6 +225,8 @@ class _AppointmentCard extends StatelessWidget {
 
     final buttonLabel = isLoading
         ? 'Booking...'
+        : isAlreadyBooked
+        ? 'Already booked'
         : isAvailable
         ? 'Appoint Now'
         : statusLabel;
@@ -371,6 +384,7 @@ Future<Appointment?> _openModal(
   BuildContext context,
   DateTime selectedDay,
   List<AppointmentSchedule> schedules,
+  Set<String> bookedSlotIds,
 ) {
   return CommonResponsiveModal.show<Appointment>(
     context: context,
@@ -383,6 +397,7 @@ Future<Appointment?> _openModal(
       child: AppointmentDetailsModal(
         selectedDay: selectedDay,
         schedules: schedules,
+        bookedSlotIds: bookedSlotIds,
       ),
     ),
   );
@@ -392,7 +407,8 @@ Future<Appointment?> _openModal(
 Future<Appointment?> showAppointmentDetailsModal(
   BuildContext context,
   DateTime selectedDay,
-  List<AppointmentSchedule> schedules,
-) {
-  return _openModal(context, selectedDay, schedules);
+  List<AppointmentSchedule> schedules, {
+  required Set<String> bookedSlotIds,
+}) {
+  return _openModal(context, selectedDay, schedules, bookedSlotIds);
 }

@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../../../../../core/theme/app_colors.dart';
 import '../../../../../../shared/appointments/presentation/bloc/appointment_bloc.dart';
 import '../../../../../../shared/appointments/presentation/bloc/appointment_event.dart';
+import '../../../../../../shared/appointments/presentation/bloc/appointment_state.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_state.dart';
@@ -95,10 +96,33 @@ class AppointmentCalendar extends StatelessWidget {
 
                   if (daySchedules.isEmpty) return;
 
+                  final appointmentState = context
+                      .read<AppointmentBloc>()
+                      .state;
+                  if (appointmentState is! AppointmentsLoaded) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Your appointments are still loading. Try again shortly.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  final bookedSlotIds = appointmentState.appointments
+                      .where(
+                        (appointment) =>
+                            appointment.status.toUpperCase() != 'CANCELLED',
+                      )
+                      .map((appointment) => appointment.slot)
+                      .where((slotId) => slotId.isNotEmpty)
+                      .toSet();
+
                   final booked = await showAppointmentDetailsModal(
                     context,
                     selectedDay,
                     daySchedules,
+                    bookedSlotIds: bookedSlotIds,
                   );
 
                   if (booked == null || !context.mounted) return;

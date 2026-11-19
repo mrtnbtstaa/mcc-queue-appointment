@@ -44,7 +44,7 @@ class TransactionsFilterSection extends StatelessWidget {
                     cubit,
                     state,
                     TransactionTab.inProgress,
-                    'In Progress',
+                    'Pending / Processing',
                     '${state.inProgressCount}',
                   ),
                 ],

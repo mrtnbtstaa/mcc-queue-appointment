@@ -48,7 +48,7 @@ class UpdateTransactionState extends Equatable {
     dateSubmitted: '',
     assignedEvaluator: '',
     currentStatus: '',
-    selectedStatus: 'In Progress',
+    selectedStatus: 'PENDING',
     targetCounter: 'Registrar Window',
     remarksText: '',
     isMultiChannelDispatchEnabled: false,
@@ -65,10 +65,11 @@ class UpdateTransactionState extends Equatable {
         assignedEvaluator: value.processedByName,
         currentStatus: value.statusText,
         selectedStatus: switch (value.transactionStatus) {
-          'COMPLETED' => 'Completed',
-          'CANCELLED' => 'Cancelled',
-          'PROCESSING' => 'Ready for Release',
-          _ => 'In Progress',
+          'PENDING' ||
+          'PROCESSING' ||
+          'COMPLETED' ||
+          'CANCELLED' => value.transactionStatus,
+          _ => 'PENDING',
         },
         targetCounter: 'Registrar Window',
         remarksText: value.remarks ?? '',

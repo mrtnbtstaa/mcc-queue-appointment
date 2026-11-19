@@ -111,7 +111,7 @@ class TransactionEntity extends Equatable {
   String get statusText {
     if (transactionStatusDisplay.isNotEmpty) return transactionStatusDisplay;
     return switch (transactionStatus) {
-      'PROCESSING' => 'In Progress',
+      'PROCESSING' => 'Processing',
       'COMPLETED' => 'Completed',
       'CANCELLED' => 'Cancelled',
       _ => 'Pending',
