@@ -50,6 +50,8 @@ class AddRegistrarServiceBottomSheet extends StatefulWidget {
 
 class _AddRegistrarServiceBottomSheetState
     extends State<AddRegistrarServiceBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+
   late final TextEditingController _serviceNameController;
   late final TextEditingController _feeController;
   late final TextEditingController _durationMinController;
@@ -119,33 +121,12 @@ class _AddRegistrarServiceBottomSheetState
 
   void _submitForm(BuildContext context) {
     if (_isSubmitting) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final name = _serviceNameController.text.trim();
-    if (name.isEmpty) {
-      _showError('Please enter a service name');
-      return;
-    }
-
     final feeText = _feeController.text.trim();
-    if (double.tryParse(feeText) == null) {
-      _showError('Please enter a valid fee');
-      return;
-    }
-
-    final durationMin = int.tryParse(_durationMinController.text.trim());
-    final durationMax = int.tryParse(_durationMaxController.text.trim());
-    if (durationMin == null || durationMax == null) {
-      _showError('Please enter the processing duration in minutes');
-      return;
-    }
-    if (durationMax < durationMin) {
-      _showError('Maximum duration must be at least the minimum');
-      return;
-    }
-    if (_selectedCategory.isEmpty) {
-      _showError('Please select a category');
-      return;
-    }
+    final durationMin = int.parse(_durationMinController.text.trim());
+    final durationMax = int.parse(_durationMaxController.text.trim());
 
     final serviceEntity = ServiceEntity(
       id: widget.serviceToEdit?.id,
@@ -194,6 +175,9 @@ class _AddRegistrarServiceBottomSheetState
       border: border(TAppColors.border),
       enabledBorder: border(TAppColors.border),
       focusedBorder: border(TAppColors.primary),
+      errorBorder: border(TAppColors.errorBorder),
+      focusedErrorBorder: border(TAppColors.errorBorder),
+      errorStyle: const TextStyle(fontSize: 11, color: TAppColors.errorText),
     );
   }
 
@@ -209,49 +193,88 @@ class _AddRegistrarServiceBottomSheetState
   }
 
   Widget _categoryDropdown({required bool useAsServiceName}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: TAppColors.inputFill,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TAppColors.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _categories.any((option) => option.value == _selectedCategory)
-              ? _selectedCategory
-              : null,
-          hint: Text(
-            useAsServiceName ? 'Select service name' : 'Select category',
-            style: const TextStyle(fontSize: 13, color: TAppColors.textHint),
-          ),
-          isExpanded: true,
-          icon: const Icon(
-            Icons.keyboard_arrow_down,
-            color: TAppColors.textSecondary,
-            size: 20,
-          ),
-          style: const TextStyle(fontSize: 13, color: TAppColors.textPrimary),
-          items: _categories
-              .map(
-                (option) => DropdownMenuItem<String>(
-                  value: option.value,
-                  child: Text(option.label),
+    return FormField<String>(
+      initialValue: _selectedCategory.isEmpty ? null : _selectedCategory,
+      validator: (value) {
+        if (useAsServiceName) {
+          return (value == null || value.isEmpty) ? 'Select a service' : null;
+        }
+        return _selectedCategory.isEmpty ? 'Select a category' : null;
+      },
+      builder: (field) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: TAppColors.inputFill,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: field.hasError
+                    ? TAppColors.errorBorder
+                    : TAppColors.border,
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value:
+                    _categories.any(
+                      (option) => option.value == _selectedCategory,
+                    )
+                    ? _selectedCategory
+                    : null,
+                hint: Text(
+                  useAsServiceName ? 'Select service name' : 'Select category',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: TAppColors.textHint,
+                  ),
                 ),
-              )
-              .toList(),
-          onChanged: (value) {
-            if (value == null) return;
-            setState(() {
-              _selectedCategory = value;
-              if (useAsServiceName) {
-                _serviceNameController.text = _categories
-                    .firstWhere((option) => option.value == value)
-                    .label;
-              }
-            });
-          },
-        ),
+                isExpanded: true,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: TAppColors.textSecondary,
+                  size: 20,
+                ),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: TAppColors.textPrimary,
+                ),
+                items: _categories
+                    .map(
+                      (option) => DropdownMenuItem<String>(
+                        value: option.value,
+                        child: Text(option.label),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() {
+                    _selectedCategory = value;
+                    if (useAsServiceName) {
+                      _serviceNameController.text = _categories
+                          .firstWhere((option) => option.value == value)
+                          .label;
+                    }
+                  });
+                  field.didChange(value);
+                },
+              ),
+            ),
+          ),
+          if (field.hasError)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, left: 12),
+              child: Text(
+                field.errorText!,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: TAppColors.errorText,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -355,187 +378,235 @@ class _AddRegistrarServiceBottomSheetState
                 Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Service Name
-                        _label('Service Name'),
-                        const SizedBox(height: 6),
-                        if (_isEditing)
-                          TextField(
-                            controller: _serviceNameController,
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Service Name
+                          _label('Service Name'),
+                          const SizedBox(height: 6),
+                          if (_isEditing)
+                            TextFormField(
+                              controller: _serviceNameController,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: TAppColors.textPrimary,
+                              ),
+                              validator: (value) => (value ?? '').trim().isEmpty
+                                  ? 'Enter the service name'
+                                  : null,
+                              decoration: _inputDecoration(
+                                hint: 'e.g., Certificate of Enrollment',
+                              ),
+                            )
+                          else
+                            _categoryDropdown(useAsServiceName: true),
+                          const SizedBox(height: 14),
+
+                          // Category Classification
+                          if (_isEditing) ...[
+                            _label('Category Classification'),
+                            const SizedBox(height: 6),
+                            _categoryDropdown(useAsServiceName: false),
+                            const SizedBox(height: 14),
+                          ],
+
+                          // Service Fee
+                          _label('Service Fee (₱)'),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: _feeController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: const TextStyle(
                               fontSize: 13,
                               color: TAppColors.textPrimary,
                             ),
-                            decoration: _inputDecoration(
-                              hint: 'e.g., Certificate of Enrollment',
-                            ),
-                          )
-                        else
-                          _categoryDropdown(useAsServiceName: true),
-                        const SizedBox(height: 14),
+                            validator: (value) {
+                              final raw = (value ?? '').trim();
+                              if (raw.isEmpty) return 'Enter the service fee';
 
-                        // Category Classification
-                        if (_isEditing) ...[
-                          _label('Category Classification'),
-                          const SizedBox(height: 6),
-                          _categoryDropdown(useAsServiceName: false),
+                              final fee = double.tryParse(raw);
+                              if (fee == null) return 'Enter a valid amount';
+                              if (fee < 0) return 'Fee cannot be negative';
+                              return null;
+                            },
+                            decoration: _inputDecoration(prefix: '₱ '),
+                          ),
                           const SizedBox(height: 14),
-                        ],
 
-                        // Service Fee
-                        _label('Service Fee (₱)'),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _feeController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: TAppColors.textPrimary,
-                          ),
-                          decoration: _inputDecoration(prefix: '₱ '),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // Processing Duration (min / max in minutes)
-                        _label('Processing Duration (minutes)'),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _durationMinController,
-                                keyboardType: TextInputType.number,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: TAppColors.textPrimary,
-                                ),
-                                decoration: _inputDecoration(hint: 'Min'),
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                '–',
-                                style: TextStyle(
-                                  color: TAppColors.textSecondary,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _durationMaxController,
-                                keyboardType: TextInputType.number,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: TAppColors.textPrimary,
-                                ),
-                                decoration: _inputDecoration(hint: 'Max'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Required Student Documents Component
-                        RequiredDocumentsField(
-                          initialDocuments: _documents,
-                          onChanged: (updatedDocs) {
-                            // The field owns its UI state; the parent only
-                            // needs the latest list for saving.
-                            _documents = List<String>.of(updatedDocs);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Active for Student Booking Toggle Card
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: TAppColors.inputFill,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: TAppColors.border),
-                          ),
-                          child: Row(
+                          // Processing Duration (min / max in minutes)
+                          _label('Processing Duration (minutes)'),
+                          const SizedBox(height: 6),
+                          Row(
                             children: [
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Active for Student Booking',
-                                      style: TextStyle(
-                                        color: TAppColors.textPrimary,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 2),
-                                    Text(
-                                      'When enabled, students can queue and book appointments for this service',
-                                      style: TextStyle(
-                                        color: TAppColors.textSecondary,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _durationMinController,
+                                  keyboardType: TextInputType.number,
+                                  autovalidateMode: AutovalidateMode.always,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: TAppColors.textPrimary,
+                                  ),
+                                  validator: (value) {
+                                    final raw = (value ?? '').trim();
+                                    if (raw.isEmpty) return 'Required';
+
+                                    final minutes = int.tryParse(raw);
+                                    if (minutes == null) {
+                                      return 'Invalid number';
+                                    }
+                                    if (minutes < 1) return 'Min 1 minute';
+                                    return null;
+                                  },
+                                  decoration: _inputDecoration(hint: 'Min'),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Switch.adaptive(
-                                value: _isActiveForBooking,
-                                activeThumbColor: TAppColors.surface,
-                                activeTrackColor: TAppColors.success,
-                                onChanged: (val) {
-                                  setState(() => _isActiveForBooking = val);
-                                },
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  '–',
+                                  style: TextStyle(
+                                    color: TAppColors.textSecondary,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _durationMaxController,
+                                  keyboardType: TextInputType.number,
+                                  autovalidateMode: AutovalidateMode.always,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: TAppColors.textPrimary,
+                                  ),
+                                  validator: (value) {
+                                    final raw = (value ?? '').trim();
+                                    if (raw.isEmpty) return 'Required';
+
+                                    final minutes = int.tryParse(raw);
+                                    if (minutes == null) {
+                                      return 'Invalid number';
+                                    }
+                                    if (minutes < 1) return 'Min 1 minute';
+
+                                    final min = int.tryParse(
+                                      _durationMinController.text.trim(),
+                                    );
+                                    if (min != null && minutes < min) {
+                                      return 'Must be ≥ min';
+                                    }
+                                    return null;
+                                  },
+                                  decoration: _inputDecoration(hint: 'Max'),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 16),
 
-                        // Submit / Save Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: CommonElevatedButton(
-                            // style: ElevatedButton.styleFrom(
-                            //   backgroundColor: TAppColors.primary,
-                            //   padding: const EdgeInsets.symmetric(vertical: 14),
-                            //   shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(12),
-                            //   ),
-                            // ),
-                            onButtonPressed: _isSubmitting
-                                ? null
-                                : () => _submitForm(context),
-                            custom: _isSubmitting
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: TAppColors.surface,
-                                    ),
-                                  )
-                                : Text(
-                                    _isEditing
-                                        ? 'Save Changes'
-                                        : 'Create Registrar Service',
-                                    style: const TextStyle(
-                                      color: TAppColors.surface,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                          // Required Student Documents Component
+                          RequiredDocumentsField(
+                            initialDocuments: _documents,
+                            onChanged: (updatedDocs) {
+                              // The field owns its UI state; the parent only
+                              // needs the latest list for saving.
+                              _documents = List<String>.of(updatedDocs);
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                          const SizedBox(height: 16),
+
+                          // Active for Student Booking Toggle Card
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: TAppColors.inputFill,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: TAppColors.border),
+                            ),
+                            child: Row(
+                              children: [
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Active for Student Booking',
+                                        style: TextStyle(
+                                          color: TAppColors.textPrimary,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'When enabled, students can queue and book appointments for this service',
+                                        style: TextStyle(
+                                          color: TAppColors.textSecondary,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Switch.adaptive(
+                                  value: _isActiveForBooking,
+                                  activeThumbColor: TAppColors.surface,
+                                  activeTrackColor: TAppColors.success,
+                                  onChanged: (val) {
+                                    setState(() => _isActiveForBooking = val);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Submit / Save Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: CommonElevatedButton(
+                              // style: ElevatedButton.styleFrom(
+                              //   backgroundColor: TAppColors.primary,
+                              //   padding: const EdgeInsets.symmetric(vertical: 14),
+                              //   shape: RoundedRectangleBorder(
+                              //     borderRadius: BorderRadius.circular(12),
+                              //   ),
+                              // ),
+                              onButtonPressed: _isSubmitting
+                                  ? null
+                                  : () => _submitForm(context),
+                              custom: _isSubmitting
+                                  ? const SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: TAppColors.surface,
+                                      ),
+                                    )
+                                  : Text(
+                                      _isEditing
+                                          ? 'Save Changes'
+                                          : 'Create Registrar Service',
+                                      style: const TextStyle(
+                                        color: TAppColors.surface,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
                   ),
                 ),

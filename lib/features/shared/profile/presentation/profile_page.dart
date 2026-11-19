@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../core/di/injector.dart';
+import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/common_elevated_button.dart';
 import '../../../../core/widgets/common_filter_chips.dart';
@@ -22,8 +23,15 @@ class ProfileWrapper extends StatelessWidget {
   );
 }
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _emailFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ProfileCubit, ProfileState>(
@@ -75,10 +83,21 @@ class ProfilePage extends StatelessWidget {
             if (profile.studentId.isNotEmpty)
               CommonText(text: 'Student ID: ${profile.studentId}'),
             const SizedBox(height: 20),
-            CommonTextField(
-              controller: cubit.emailController,
-              keyboardType: TextInputType.emailAddress,
-              labelText: 'Email',
+            Form(
+              key: _emailFormKey,
+              child: CommonTextField(
+                controller: cubit.emailController,
+                keyboardType: TextInputType.emailAddress,
+                labelText: 'Email',
+                validator: (value) {
+                  final email = value?.trim() ?? '';
+                  if (email.isEmpty) return 'Email is required';
+                  if (!email.isValidEmail) {
+                    return 'Enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
             ),
             if (profile.role.toLowerCase() == 'student') ...[
               const SizedBox(height: 12),
@@ -96,7 +115,15 @@ class ProfilePage extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: CommonElevatedButton(
-                onButtonPressed: state.isSaving ? null : cubit.saveChanges,
+                onButtonPressed: state.isSaving
+                    ? null
+                    : () {
+                        if (!(_emailFormKey.currentState?.validate() ??
+                            false)) {
+                          return;
+                        }
+                        cubit.saveChanges();
+                      },
                 text: 'Save profile',
                 fontSize: 13,
               ),
@@ -278,6 +305,7 @@ class _ChangePasswordForm extends StatefulWidget {
 }
 
 class _ChangePasswordFormState extends State<_ChangePasswordForm> {
+  final _formKey = GlobalKey<FormState>();
   final _current = TextEditingController();
   final _new = TextEditingController();
   final _confirm = TextEditingController();
@@ -291,49 +319,72 @@ class _ChangePasswordFormState extends State<_ChangePasswordForm> {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      CommonTextField(
-        controller: _current,
-        obscureText: true,
-        labelText: 'Current password',
-      ),
-      const SizedBox(height: 12),
-      CommonTextField(
-        controller: _new,
-        obscureText: true,
-        labelText: 'New password',
-      ),
-      const SizedBox(height: 12),
-      CommonTextField(
-        controller: _confirm,
-        obscureText: true,
-        labelText: 'Confirm new password',
-      ),
-      const SizedBox(height: 12),
-      Align(
-        alignment: Alignment.centerRight,
-        child: CommonElevatedButton(
-          onButtonPressed: widget.isSaving
-              ? null
-              : () async {
-                  await widget.cubit.changePassword(
-                    currentPassword: _current.text,
-                    newPassword: _new.text,
-                    confirmPassword: _confirm.text,
-                  );
-                  if (widget.cubit.state.successMessage ==
-                      'Password changed successfully.') {
-                    _current.clear();
-                    _new.clear();
-                    _confirm.clear();
-                  }
-                },
-          text: 'Change password',
-          fontSize: 13,
+  Widget build(BuildContext context) => Form(
+    key: _formKey,
+    child: Column(
+      children: [
+        CommonTextField(
+          controller: _current,
+          obscureText: true,
+          labelText: 'Current password',
+          validator: (value) =>
+              (value ?? '').isEmpty ? 'Enter your current password' : null,
         ),
-      ),
-    ],
+        const SizedBox(height: 12),
+        CommonTextField(
+          controller: _new,
+          obscureText: true,
+          labelText: 'New password',
+          validator: (value) {
+            final password = value ?? '';
+            if (password.isEmpty) return 'Enter a new password';
+            if (password.length < 8) {
+              return 'Password must be at least 8 characters';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
+        CommonTextField(
+          controller: _confirm,
+          obscureText: true,
+          labelText: 'Confirm new password',
+          validator: (value) {
+            if ((value ?? '').isEmpty) {
+              return 'Confirm your new password';
+            }
+            if (value != _new.text) return 'Passwords do not match';
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: CommonElevatedButton(
+            onButtonPressed: widget.isSaving
+                ? null
+                : () async {
+                    if (!(_formKey.currentState?.validate() ?? false)) {
+                      return;
+                    }
+                    await widget.cubit.changePassword(
+                      currentPassword: _current.text,
+                      newPassword: _new.text,
+                      confirmPassword: _confirm.text,
+                    );
+                    if (widget.cubit.state.successMessage ==
+                        'Password changed successfully.') {
+                      _current.clear();
+                      _new.clear();
+                      _confirm.clear();
+                    }
+                  },
+            text: 'Change password',
+            fontSize: 13,
+          ),
+        ),
+      ],
+    ),
   );
 }
 

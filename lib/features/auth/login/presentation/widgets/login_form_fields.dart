@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../../core/auth/auth_state.dart';
 import '../../../../../core/di/injector.dart';
 import '../../../../../core/extensions/double_extension.dart';
+import '../../../../../core/extensions/string_extension.dart';
 import '../../../../../core/router/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_elevated_button.dart';
@@ -109,8 +110,14 @@ class _LoginFormState extends State<LoginFormFields> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  final input = value?.trim() ?? '';
+                  if (input.isEmpty) {
                     return 'Please enter your email or student ID';
+                  }
+                  // Student IDs are accepted too, so only validate the format
+                  // once the input looks like an email address.
+                  if (input.contains('@') && !input.isValidEmail) {
+                    return 'Enter a valid email address';
                   }
                   return null;
                 },

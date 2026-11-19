@@ -21,6 +21,9 @@ class CommonTextField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.onSubmitted,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
+    this.errorStyle,
+    this.errorMaxLines = 2,
     this.maxLines = 1,
     this.minLines,
     this.maxLength,
@@ -48,6 +51,9 @@ class CommonTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final AutovalidateMode autovalidateMode;
+  final TextStyle? errorStyle;
+  final int errorMaxLines;
   final int? maxLines;
   final int? minLines;
   final int? maxLength;
@@ -115,6 +121,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           validator: widget.validator,
+          autovalidateMode: widget.autovalidateMode,
           onChanged: widget.onChanged,
           onFieldSubmitted: widget.onSubmitted,
           maxLines: widget.obscureText ? 1 : widget.maxLines,
@@ -129,6 +136,10 @@ class _CommonTextFieldState extends State<CommonTextField> {
             hintStyle:
                 widget.hintStyle ??
                 TextStyle(fontSize: 13.5, color: Colors.grey.shade400),
+            errorStyle:
+                widget.errorStyle ??
+                const TextStyle(fontSize: 11, color: TAppColors.errorText),
+            errorMaxLines: widget.errorMaxLines,
             // Conditionally render prefix icon ONLY when provided
             prefixIcon: widget.prefixIcon != null
                 ? Padding(

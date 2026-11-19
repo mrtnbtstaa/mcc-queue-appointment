@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../../core/extensions/double_extension.dart';
+import '../../../../../core/extensions/string_extension.dart';
 import '../../../../../core/router/app_routes.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_dropdown_field.dart';
@@ -282,7 +283,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 validator: (v) {
                   final value = v?.trim() ?? '';
                   if (value.isEmpty) return 'Email is required';
-                  if (!value.contains('@')) return 'Enter a valid email';
+                  if (!value.isValidEmail) return 'Enter a valid email address';
                   return null;
                 },
               ),
@@ -365,9 +366,11 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
                 onSuffixPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
-                validator: (v) => (v ?? '').length < 8
-                    ? 'Password must be at least 8 characters'
-                    : null,
+                validator: (v) => (v ?? '').isEmpty
+                    ? 'Password is required'
+                    : (v!.length < 8
+                          ? 'Password must be at least 8 characters'
+                          : null),
               ),
               if (_passwordStrengthText.isNotEmpty) ...[
                 8.0.height,
@@ -407,9 +410,13 @@ class _RegisterFormState extends State<RegisterForm> {
                 onSuffixPressed: () => setState(
                   () => _obscureConfirmPassword = !_obscureConfirmPassword,
                 ),
-                validator: (v) => v != _passwordController.text
-                    ? 'Passwords do not match'
-                    : null,
+                validator: (v) {
+                  if ((v ?? '').isEmpty) return 'Please confirm your password';
+                  if (v != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
               ),
               16.0.height,
 

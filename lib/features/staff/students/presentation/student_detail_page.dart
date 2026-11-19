@@ -1,8 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../../core/constants/academic_options.dart';
 import '../../../../core/di/injector.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/extensions/string_extension.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/common_dropdown_field.dart';
 import '../../../../core/widgets/common_elevated_button.dart';
 import '../../../../core/widgets/common_page_body.dart';
 import '../../../../core/widgets/common_snackbar.dart';
@@ -62,11 +65,13 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
   late final _emailController = TextEditingController(
     text: widget.profile.email,
   );
-  late final _courseController = TextEditingController(
-    text: widget.profile.course,
+  late String? _course = normalizeAcademicValue(
+    courseOptions,
+    widget.profile.course,
   );
-  late final _yearLevelController = TextEditingController(
-    text: widget.profile.yearLevel,
+  late String? _yearLevel = normalizeAcademicValue(
+    yearLevelOptions,
+    widget.profile.yearLevel,
   );
   late ProfileEntity _profile = widget.profile;
   bool _isActive = false;
@@ -87,8 +92,8 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
         name: _nameController.text.trim(),
         studentId: _studentIdController.text.trim(),
         email: _emailController.text.trim(),
-        course: _courseController.text.trim(),
-        yearLevel: _yearLevelController.text.trim(),
+        course: _course ?? '',
+        yearLevel: _yearLevel ?? '',
         isActive: _isActive,
       ),
     );
@@ -105,8 +110,11 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
           _nameController.text = updated.name;
           _studentIdController.text = updated.studentId;
           _emailController.text = updated.email;
-          _courseController.text = updated.course;
-          _yearLevelController.text = updated.yearLevel;
+          _course = normalizeAcademicValue(courseOptions, updated.course);
+          _yearLevel = normalizeAcademicValue(
+            yearLevelOptions,
+            updated.yearLevel,
+          );
           _isSaving = false;
         });
         CommonSnackbar.showSuccess(context, 'Student information updated.');
@@ -119,8 +127,6 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
     _nameController.dispose();
     _studentIdController.dispose();
     _emailController.dispose();
-    _courseController.dispose();
-    _yearLevelController.dispose();
     super.dispose();
   }
 
@@ -159,23 +165,30 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
             final email = value?.trim() ?? '';
-            if (email.isEmpty || !email.contains('@')) {
-              return 'Enter a valid email address.';
-            }
+            if (email.isEmpty) return 'Email is required.';
+            if (!email.isValidEmail) return 'Enter a valid email address.';
             return null;
           },
         ),
         const SizedBox(height: 12),
-        CommonTextField(
+        CommonDropdownField<String>(
           labelText: 'Course',
-          controller: _courseController,
-          validator: _requiredField('Enter a course.'),
+          value: _course,
+          hintText: 'Select course',
+          items: _dropdownItems(courseOptions, _course),
+          onChanged: (value) => setState(() => _course = value),
+          validator: (value) =>
+              value == null || value.isEmpty ? 'Select a course.' : null,
         ),
         const SizedBox(height: 12),
-        CommonTextField(
+        CommonDropdownField<String>(
           labelText: 'Year level',
-          controller: _yearLevelController,
-          validator: _requiredField('Enter a year level.'),
+          value: _yearLevel,
+          hintText: 'Select year level',
+          items: _dropdownItems(yearLevelOptions, _yearLevel),
+          onChanged: (value) => setState(() => _yearLevel = value),
+          validator: (value) =>
+              value == null || value.isEmpty ? 'Select a year level.' : null,
         ),
         const SizedBox(height: 12),
         SwitchListTile.adaptive(
@@ -200,4 +213,19 @@ class _StudentDetailsEditorState extends State<_StudentDetailsEditor> {
 
   FormFieldValidator<String> _requiredField(String message) =>
       (value) => value == null || value.trim().isEmpty ? message : null;
+
+  /// Keeps a stored value selectable even when it is not in the backend list.
+  List<DropdownMenuItem<String>> _dropdownItems(
+    List<AcademicOption> options,
+    String? selected,
+  ) {
+    return [
+      for (final option in options)
+        DropdownMenuItem(value: option.value, child: Text(option.label)),
+      if (selected != null &&
+          selected.isNotEmpty &&
+          !options.any((option) => option.value == selected))
+        DropdownMenuItem(value: selected, child: Text(selected)),
+    ];
+  }
 }

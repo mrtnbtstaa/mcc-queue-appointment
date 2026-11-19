@@ -7,9 +7,11 @@ class CommonDropdownField<T> extends StatelessWidget {
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?> onChanged;
   final String hintText;
+  final String? labelText;
   final IconData? prefixIcon;
   final String? Function(T?)? validator;
   final bool enabled;
+  final AutovalidateMode autovalidateMode;
 
   const CommonDropdownField({
     super.key,
@@ -17,14 +19,16 @@ class CommonDropdownField<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.hintText = 'Select an option',
+    this.labelText,
     this.prefixIcon,
     this.validator,
     this.enabled = true,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
+    final dropdown = DropdownButtonFormField<T>(
       initialValue: value,
       isExpanded: true,
       decoration: InputDecoration(
@@ -60,6 +64,26 @@ class CommonDropdownField<T> extends StatelessWidget {
       items: items,
       onChanged: enabled ? onChanged : null,
       validator: validator,
+      autovalidateMode: autovalidateMode,
+    );
+
+    if (labelText == null) return dropdown;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          labelText!,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: TAppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        dropdown,
+      ],
     );
   }
 }

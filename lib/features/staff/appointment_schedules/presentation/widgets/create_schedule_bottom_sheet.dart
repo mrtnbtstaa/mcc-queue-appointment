@@ -47,6 +47,12 @@ class CreateServiceSlotsBottomSheet extends StatefulWidget {
 
 class CreateServiceSlotsBottomSheetState
     extends State<CreateServiceSlotsBottomSheet> {
+  static const _errorStyle = TextStyle(
+    fontSize: 11,
+    color: TAppColors.errorText,
+  );
+
+  final _formKey = GlobalKey<FormState>();
   late String _selectedServiceID = widget.schedule?.serviceName ?? '';
 
   final TextEditingController _dateController = TextEditingController(
@@ -80,6 +86,19 @@ class CreateServiceSlotsBottomSheetState
     _endTimeController.dispose();
     _capacityController.dispose();
     super.dispose();
+  }
+
+  /// Parses both `HH:mm` and `HH:mm:ss` into minutes since midnight.
+  int? _minutesOfDay(String value) {
+    final parts = value.trim().split(':');
+    if (parts.length < 2) return null;
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+
+    return hour * 60 + minute;
   }
 
   @override
@@ -168,409 +187,502 @@ class CreateServiceSlotsBottomSheetState
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Target Service
-                    const Text(
-                      'Target Service',
-                      style: TextStyle(
-                        color: TAppColors.textPrimary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Target Service
+                      const Text(
+                        'Target Service',
+                        style: TextStyle(
+                          color: TAppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    BlocBuilder<ManageSchedulesBloc, ManageSchedulesState>(
-                      builder: (context, state) {
-                        debugPrint(_selectedServiceID);
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          decoration: BoxDecoration(
-                            color: TAppColors.inputFill,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: TAppColors.border),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value:
-                                  state.services.any(
-                                    (service) =>
-                                        service.name == _selectedServiceID,
-                                  )
-                                  ? _selectedServiceID
-                                  : null,
-                              isExpanded: true,
-                              hint: const Text('Select Service'),
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: TAppColors.textSecondary,
-                                size: 20,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: TAppColors.textPrimary,
-                              ),
-                              items: state.services.map((service) {
-                                return DropdownMenuItem<String>(
-                                  value: service.name,
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.school_outlined,
-                                        size: 16,
+                      const SizedBox(height: 6),
+                      BlocBuilder<ManageSchedulesBloc, ManageSchedulesState>(
+                        builder: (context, state) {
+                          return FormField<String>(
+                            initialValue: _selectedServiceID.isEmpty
+                                ? null
+                                : _selectedServiceID,
+                            validator: (value) =>
+                                (value == null || value.isEmpty)
+                                ? 'Select a service'
+                                : null,
+                            builder: (field) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: TAppColors.inputFill,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: field.hasError
+                                          ? TAppColors.errorBorder
+                                          : TAppColors.border,
+                                    ),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value:
+                                          state.services.any(
+                                            (service) =>
+                                                service.name ==
+                                                _selectedServiceID,
+                                          )
+                                          ? _selectedServiceID
+                                          : null,
+                                      isExpanded: true,
+                                      hint: const Text('Select Service'),
+                                      icon: const Icon(
+                                        Icons.keyboard_arrow_down,
                                         color: TAppColors.textSecondary,
+                                        size: 20,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          service.name,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: TAppColors.textPrimary,
                                       ),
-                                    ],
+                                      items: state.services.map((service) {
+                                        return DropdownMenuItem<String>(
+                                          value: service.name,
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.school_outlined,
+                                                size: 16,
+                                                color: TAppColors.textSecondary,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  service.name,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        if (newValue == null) return;
+                                        setState(() {
+                                          _selectedServiceID = newValue;
+                                        });
+                                        field.didChange(newValue);
+                                      },
+                                    ),
                                   ),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    _selectedServiceID = newValue;
-                                  });
-                                }
-                              },
+                                ),
+                                if (field.hasError)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 4,
+                                      left: 12,
+                                    ),
+                                    child: Text(
+                                      field.errorText!,
+                                      style: _errorStyle,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Date Application (Start & End Date)
+                      const Text(
+                        'Date Application',
+                        style: TextStyle(
+                          color: TAppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _dateController,
+                        readOnly: true,
+                        validator: (value) => (value ?? '').trim().isEmpty
+                            ? 'Select an appointment date'
+                            : null,
+                        onTap: () async {
+                          final today = DateUtils.dateOnly(DateTime.now());
+                          final initialDate = widget.schedule?.date ?? today;
+                          final selectedDate = await showDatePicker(
+                            context: context,
+                            initialDate: initialDate.isBefore(today)
+                                ? today
+                                : initialDate,
+                            firstDate: today,
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (selectedDate != null) {
+                            setState(() {
+                              _dateController.text = DateFormat('MMM d, yyyy')
+                                  .format(selectedDate);
+                            });
+                          }
+                        },
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: TAppColors.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: TAppColors.textSecondary,
+                          ),
+                          suffixIcon: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: TAppColors.textSecondary,
+                          ),
+                          hintText: 'Select Date',
+                          filled: true,
+                          fillColor: TAppColors.inputFill,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: TAppColors.border,
                             ),
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 14),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: TAppColors.border,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: TAppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      // Daily Start & End Time Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Daily Start',
+                                  style: TextStyle(
+                                    color: TAppColors.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                TextFormField(
+                                  controller: _startTimeController,
+                                  readOnly: true,
+                                  autovalidateMode: AutovalidateMode.always,
+                                  validator: (value) {
+                                    final raw = (value ?? '').trim();
+                                    if (raw.isEmpty)
+                                      return 'Select a start time';
+                                    if (_minutesOfDay(raw) == null) {
+                                      return 'Enter a valid start time';
+                                    }
+                                    return null;
+                                  },
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: TAppColors.textPrimary,
+                                  ),
+                                  onTap: () async {
+                                    final selectedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now(),
+                                    );
 
-                    // Date Application (Start & End Date)
-                    const Text(
-                      'Date Application',
-                      style: TextStyle(
-                        color: TAppColors.textPrimary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _dateController,
-                      readOnly: true,
-                      onTap: () async {
-                        final today = DateUtils.dateOnly(DateTime.now());
-                        final initialDate = widget.schedule?.date ?? today;
-                        final selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: initialDate.isBefore(today)
-                              ? today
-                              : initialDate,
-                          firstDate: today,
-                          lastDate: DateTime(2100),
-                        );
+                                    if (selectedTime != null) {
+                                      setState(() {
+                                        _startTimeController.text =
+                                            '${selectedTime.hour.toString().padLeft(2, '0')}:'
+                                            '${selectedTime.minute.toString().padLeft(2, '0')}:00';
+                                      });
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Select start time',
+                                    prefixIcon: const Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: TAppColors.textSecondary,
+                                    ),
+                                    filled: true,
+                                    fillColor: TAppColors.inputFill,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.border,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.border,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Daily End',
+                                  style: TextStyle(
+                                    color: TAppColors.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                TextFormField(
+                                  controller: _endTimeController,
+                                  readOnly: true,
+                                  autovalidateMode: AutovalidateMode.always,
+                                  validator: (value) {
+                                    final raw = (value ?? '').trim();
+                                    if (raw.isEmpty)
+                                      return 'Select an end time';
 
-                        if (selectedDate != null) {
-                          setState(() {
-                            _dateController.text = DateFormat('MMM d, yyyy')
-                                .format(selectedDate);
-                          });
-                        }
-                      },
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: TAppColors.textPrimary,
+                                    final end = _minutesOfDay(raw);
+                                    if (end == null) {
+                                      return 'Enter a valid end time';
+                                    }
+
+                                    final start = _minutesOfDay(
+                                      _startTimeController.text,
+                                    );
+                                    if (start != null && end <= start) {
+                                      return 'End time must be after start time';
+                                    }
+                                    return null;
+                                  },
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: TAppColors.textPrimary,
+                                  ),
+                                  onTap: () async {
+                                    final selectedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now(),
+                                    );
+
+                                    if (selectedTime != null) {
+                                      setState(() {
+                                        _endTimeController.text =
+                                            '${selectedTime.hour.toString().padLeft(2, '0')}:'
+                                            '${selectedTime.minute.toString().padLeft(2, '0')}:00';
+                                      });
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Select end time',
+                                    prefixIcon: const Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: TAppColors.textSecondary,
+                                    ),
+                                    filled: true,
+                                    fillColor: TAppColors.inputFill,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.border,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.border,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: TAppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.calendar_today_outlined,
-                          size: 16,
-                          color: TAppColors.textSecondary,
-                        ),
-                        suffixIcon: const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: TAppColors.textSecondary,
-                        ),
-                        hintText: 'Select Date',
-                        filled: true,
-                        fillColor: TAppColors.inputFill,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: TAppColors.border,
+                      const SizedBox(height: 14),
+
+                      // Slot Duration & Capacity Row
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Capacity / Slot',
+                            style: TextStyle(
+                              color: TAppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: TAppColors.border,
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: _capacityController,
+                            keyboardType: TextInputType.number,
+                            autovalidateMode: AutovalidateMode.always,
+                            validator: (value) {
+                              final raw = (value ?? '').trim();
+                              if (raw.isEmpty) {
+                                return 'Enter the slot capacity';
+                              }
+                              final capacity = int.tryParse(raw);
+                              if (capacity == null) {
+                                return 'Enter a valid number';
+                              }
+                              if (capacity < 1) {
+                                return 'Capacity must be at least 1';
+                              }
+                              return null;
+                            },
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: TAppColors.textPrimary,
+                            ),
+                            decoration: InputDecoration(
+                              suffixText: 'students',
+                              suffixStyle: const TextStyle(
+                                color: TAppColors.textHint,
+                                fontSize: 11,
+                              ),
+                              filled: true,
+                              fillColor: TAppColors.inputFill,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: TAppColors.border,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: TAppColors.border,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: TAppColors.primary,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: TAppColors.primary,
-                          ),
-                        ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    // Daily Start & End Time Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Daily Start',
+                      const SizedBox(height: 20),
+
+                      // Footer Action Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: TAppColors.textPrimary,
+                                side: const BorderSide(
+                                  color: TAppColors.border,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancel',
                                 style: TextStyle(
-                                  color: TAppColors.textPrimary,
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              TextFormField(
-                                controller: _startTimeController,
-                                readOnly: true,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: TAppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _saveSchedule(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: TAppColors.primary,
+                                foregroundColor: TAppColors.surface,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
                                 ),
-                                onTap: () async {
-                                  final selectedTime = await showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  );
-
-                                  if (selectedTime != null) {
-                                    _startTimeController.text =
-                                        '${selectedTime.hour.toString().padLeft(2, '0')}:'
-                                        '${selectedTime.minute.toString().padLeft(2, '0')}:00';
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  hintText: 'Select start time',
-                                  prefixIcon: const Icon(
-                                    Icons.access_time,
-                                    size: 16,
-                                    color: TAppColors.textSecondary,
-                                  ),
-                                  filled: true,
-                                  fillColor: TAppColors.inputFill,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.border,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.border,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.primary,
-                                    ),
-                                  ),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Daily End',
+                              child: Text(
+                                widget.schedule == null
+                                    ? 'Save Schedule'
+                                    : 'Update Schedule',
                                 style: TextStyle(
-                                  color: TAppColors.textPrimary,
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              TextFormField(
-                                controller: _endTimeController,
-                                readOnly: true,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: TAppColors.textPrimary,
-                                ),
-                                onTap: () async {
-                                  final selectedTime = await showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  );
-
-                                  if (selectedTime != null) {
-                                    _endTimeController.text =
-                                        '${selectedTime.hour.toString().padLeft(2, '0')}:'
-                                        '${selectedTime.minute.toString().padLeft(2, '0')}:00';
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  hintText: 'Select end time',
-                                  prefixIcon: const Icon(
-                                    Icons.access_time,
-                                    size: 16,
-                                    color: TAppColors.textSecondary,
-                                  ),
-                                  filled: true,
-                                  fillColor: TAppColors.inputFill,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.border,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.border,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: TAppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Slot Duration & Capacity Row
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Capacity / Slot',
-                          style: TextStyle(
-                            color: TAppColors.textPrimary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _capacityController,
-                          keyboardType: TextInputType.number,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: TAppColors.textPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            suffixText: 'students',
-                            suffixStyle: const TextStyle(
-                              color: TAppColors.textHint,
-                              fontSize: 11,
-                            ),
-                            filled: true,
-                            fillColor: TAppColors.inputFill,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: TAppColors.border,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: TAppColors.border,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: TAppColors.primary,
-                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Footer Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: TAppColors.textPrimary,
-                              side: const BorderSide(color: TAppColors.border),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => _saveSchedule(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: TAppColors.primary,
-                              foregroundColor: TAppColors.surface,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              widget.schedule == null
-                                  ? 'Save Schedule'
-                                  : 'Update Schedule',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -581,6 +693,8 @@ class CreateServiceSlotsBottomSheetState
   }
 
   void _saveSchedule(BuildContext context) {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
     final date = DateFormat('MMM d, yyyy').parse(_dateController.text);
     final bloc = context.read<ManageSchedulesBloc>();
     final existingSchedule = widget.schedule;
