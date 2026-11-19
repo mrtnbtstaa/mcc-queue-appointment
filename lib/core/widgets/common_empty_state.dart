@@ -59,11 +59,6 @@ class CommonEmptyState extends StatelessWidget {
             TextButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
           const SizedBox(height: 8),
-          const Text(
-            'Illustration by Storyset · storyset.com',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: TAppColors.textHint, fontSize: 10),
-          ),
         ],
       ),
     ),
