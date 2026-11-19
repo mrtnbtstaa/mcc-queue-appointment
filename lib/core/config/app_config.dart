@@ -13,13 +13,13 @@ class AppConfig {
 
   static const development = AppConfig(
     environment: AppEnvironment.development,
-    appName: 'MyApp Development',
+    appName: 'MCC Registrar Development',
     baseUrl: 'http://10.0.2.2:8000/api/',
   );
 
   static const production = AppConfig(
     environment: AppEnvironment.production,
-    appName: 'MyApp',
+    appName: 'MCC Registrar',
     baseUrl: String.fromEnvironment(
       'API_BASE_URL',
       defaultValue: 'https://mcc-queue-appointment-be.onrender.com/api/',
