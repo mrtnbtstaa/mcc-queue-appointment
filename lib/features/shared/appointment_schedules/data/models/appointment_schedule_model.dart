@@ -32,10 +32,7 @@ class AppointmentScheduleModel extends AppointmentSchedule {
   Map<String, dynamic> toJson() {
     return {
       'service': service,
-      'appointment_date':
-          '${date.year.toString().padLeft(4, '0')}-'
-          '${date.month.toString().padLeft(2, '0')}-'
-          '${date.day.toString().padLeft(2, '0')}',
+      'appointment_date': _appointmentDate,
       'start_time': startTime,
       'end_time': endTime,
       'capacity': capacity,
@@ -43,4 +40,17 @@ class AppointmentScheduleModel extends AppointmentSchedule {
       "service_name": serviceName,
     };
   }
+
+  Map<String, dynamic> toUpdateJson() => {
+    'service': service,
+    'appointment_date': _appointmentDate,
+    'start_time': startTime,
+    'end_time': endTime,
+    'capacity': capacity,
+  };
+
+  String get _appointmentDate =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 }

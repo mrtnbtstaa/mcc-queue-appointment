@@ -86,6 +86,12 @@ final class ApiErrorMapper {
   /// Extracts a human-readable message from the backend envelope.
   String _messageFrom(DioException e) {
     final data = _jsonData(e.response?.data);
+    if (e.response?.statusCode == 400 || e.response?.statusCode == 422) {
+      final details = data is Map
+          ? _formatErrors(data['errors'] ?? data['data'])
+          : '';
+      if (details.isNotEmpty) return details;
+    }
     final message = _findMessage(data);
     if (message != null) return message;
     if (data is String && data.trim().isNotEmpty) return data.trim();

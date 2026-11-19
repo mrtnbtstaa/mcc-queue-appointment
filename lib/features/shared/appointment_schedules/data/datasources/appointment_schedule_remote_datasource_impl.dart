@@ -72,7 +72,7 @@ class AppointmentScheduleRemoteDataSourceImpl
   ) async {
     return _client.patch<AppointmentScheduleModel>(
       'v1/appointment-slots/$id/',
-      body: model.toJson(),
+      body: model.toUpdateJson(),
       requireAuth: true,
       isIdempotent: true,
       decode: (json) {
