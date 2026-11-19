@@ -11,6 +11,7 @@ import '../../../../shared/appointment_schedules/domain/entities/appointment_sch
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_state.dart';
+import 'create_schedule_bottom_sheet.dart';
 
 class DailyTimeSlotsList extends StatelessWidget {
   const DailyTimeSlotsList({super.key});
@@ -246,13 +247,13 @@ class _TimeSlotCard extends StatelessWidget {
                 runSpacing: 6,
                 children: [
                   CommonElevatedButton(
-                    onButtonPressed: () {
-                      if (slot.id != null) {
-                        context.read<ManageSchedulesBloc>().add(
-                          LoadSchedule(slot.id.toString()),
-                        );
-                      }
-                    },
+                    onButtonPressed: slot.id == null
+                        ? null
+                        : () =>
+                              CreateServiceSlotsBottomSheet.showEditScheduleModal(
+                                context,
+                                slot,
+                              ),
                     backgroundColor: TAppColors.surface,
                     borderColor: TAppColors.border,
                     borderWidth: 1,

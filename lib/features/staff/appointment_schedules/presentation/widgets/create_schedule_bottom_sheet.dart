@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/common_bottom_sheet.dart';
 import '../../../../../core/widgets/common_responsive_modal.dart';
 import '../../../../shared/appointment_schedules/domain/entities/appointment_schedule.dart';
@@ -11,9 +11,22 @@ import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedu
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_state.dart';
 
 class CreateServiceSlotsBottomSheet extends StatefulWidget {
-  const CreateServiceSlotsBottomSheet({super.key});
+  const CreateServiceSlotsBottomSheet({super.key, this.schedule});
+
+  final AppointmentSchedule? schedule;
 
   static void showCreateServiceSlotsModal(BuildContext context) {
+    _show(context);
+  }
+
+  static void showEditScheduleModal(
+    BuildContext context,
+    AppointmentSchedule schedule,
+  ) {
+    _show(context, schedule: schedule);
+  }
+
+  static void _show(BuildContext context, {AppointmentSchedule? schedule}) {
     final bloc = context.read<ManageSchedulesBloc>();
 
     CommonResponsiveModal.show<void>(
@@ -22,7 +35,7 @@ class CreateServiceSlotsBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: bloc,
-        child: const CreateServiceSlotsBottomSheet(),
+        child: CreateServiceSlotsBottomSheet(schedule: schedule),
       ),
     );
   }
@@ -34,7 +47,7 @@ class CreateServiceSlotsBottomSheet extends StatefulWidget {
 
 class CreateServiceSlotsBottomSheetState
     extends State<CreateServiceSlotsBottomSheet> {
-  String _selectedServiceID = "";
+  late String _selectedServiceID = widget.schedule?.serviceName ?? '';
 
   final TextEditingController _dateController = TextEditingController(
     text: 'Oct 1, 2026',
@@ -48,6 +61,17 @@ class CreateServiceSlotsBottomSheetState
   final TextEditingController _capacityController = TextEditingController(
     text: '10',
   );
+
+  @override
+  void initState() {
+    super.initState();
+    final schedule = widget.schedule;
+    if (schedule == null) return;
+    _dateController.text = DateFormat('MMM d, yyyy').format(schedule.date);
+    _startTimeController.text = schedule.startTime;
+    _endTimeController.text = schedule.endTime;
+    _capacityController.text = schedule.capacity.toString();
+  }
 
   @override
   void dispose() {
@@ -98,22 +122,26 @@ class CreateServiceSlotsBottomSheetState
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Create Service Slots',
-                          style: TextStyle(
+                          widget.schedule == null
+                              ? 'Create Service Slots'
+                              : 'Edit Schedule',
+                          style: const TextStyle(
                             color: TAppColors.surface,
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
-                          'Batch generate bookable student windows',
-                          style: TextStyle(
+                          widget.schedule == null
+                              ? 'Batch generate bookable student windows'
+                              : 'Update this bookable student window',
+                          style: const TextStyle(
                             color: Color.fromARGB(179, 8, 7, 7),
                             fontSize: 11,
                           ),
@@ -234,7 +262,7 @@ class CreateServiceSlotsBottomSheetState
                       onTap: () async {
                         final selectedDate = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: widget.schedule?.date ?? DateTime.now(),
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2100),
                         );
@@ -514,43 +542,7 @@ class CreateServiceSlotsBottomSheetState
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
-                              final date = DateFormat("MMM d, yyyy")
-                                  .parse(_dateController.text);
-                              if (context
-                                  .read<ManageSchedulesBloc>()
-                                  .state
-                                  .schedulesFor(date)
-                                  .isNotEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'A schedule already exists for this date.',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              context.read<ManageSchedulesBloc>().add(
-                                CreateSchedule(
-                                  AppointmentSchedule(
-                                    service: _selectedServiceID,
-                                    status: 'AVAILABLE',
-                                    startTime: _startTimeController.text,
-                                    endTime: _endTimeController.text,
-                                    date: date,
-                                    capacity:
-                                        int.tryParse(
-                                          _capacityController.text,
-                                        ) ??
-                                        0,
-                                    serviceName: _selectedServiceID,
-                                  ),
-                                ),
-                              );
-                              Navigator.pop(context);
-                            },
+                            onPressed: () => _saveSchedule(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: TAppColors.primary,
                               foregroundColor: TAppColors.surface,
@@ -560,8 +552,10 @@ class CreateServiceSlotsBottomSheetState
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              'Save Schedule',
+                            child: Text(
+                              widget.schedule == null
+                                  ? 'Save Schedule'
+                                  : 'Update Schedule',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -580,5 +574,49 @@ class CreateServiceSlotsBottomSheetState
         ),
       ),
     );
+  }
+
+  void _saveSchedule(BuildContext context) {
+    final date = DateFormat('MMM d, yyyy').parse(_dateController.text);
+    final bloc = context.read<ManageSchedulesBloc>();
+    final existingSchedule = widget.schedule;
+    final duplicateDate = bloc.state
+        .schedulesFor(date)
+        .any((schedule) => schedule.id != existingSchedule?.id);
+    if (duplicateDate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A schedule already exists for this date.'),
+        ),
+      );
+      return;
+    }
+
+    final schedule = AppointmentSchedule(
+      id: existingSchedule?.id,
+      service:
+          existingSchedule != null &&
+              _selectedServiceID == existingSchedule.serviceName
+          ? existingSchedule.service
+          : _selectedServiceID,
+      status: existingSchedule?.status ?? 'AVAILABLE',
+      startTime: _startTimeController.text,
+      endTime: _endTimeController.text,
+      date: date,
+      capacity: int.tryParse(_capacityController.text) ?? 0,
+      remainingCapacity: existingSchedule?.remainingCapacity,
+      serviceName: _selectedServiceID,
+    );
+    if (existingSchedule == null) {
+      bloc.add(CreateSchedule(schedule));
+    } else if (existingSchedule.id != null) {
+      bloc.add(UpdateSchedule(id: existingSchedule.id!, schedule: schedule));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This schedule cannot be edited.')),
+      );
+      return;
+    }
+    Navigator.pop(context);
   }
 }

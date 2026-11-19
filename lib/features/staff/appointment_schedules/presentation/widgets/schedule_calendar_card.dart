@@ -2,9 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../../../../core/extensions/double_extension.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../core/widgets/common_text.dart';
+import '../../../../../core/extensions/double_extension.dart';
+import '../../../../../core/extensions/context_extension.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/common_text.dart';
 import 'schedule_date_details_sheet.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
@@ -102,7 +103,7 @@ class ScheduleCalendarCard extends StatelessWidget {
                     SelectDate(selectedDay),
                   );
                   final events = state.schedulesFor(selectedDay);
-                  if (events.isNotEmpty) {
+                  if (events.isNotEmpty && !context.isDesktop) {
                     ScheduleDateDetailsSheet.show(context, selectedDay, events);
                   }
                 },
