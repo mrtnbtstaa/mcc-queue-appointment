@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../../../../../core/theme/app_colors.dart';
+import '../../../../../../shared/appointments/presentation/bloc/appointment_bloc.dart';
+import '../../../../../../shared/appointments/presentation/bloc/appointment_event.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_bloc.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_event.dart';
 import '../../../../../../shared/appointment_schedules/presentation/bloc/manage_schedules_state.dart';
@@ -103,6 +105,9 @@ class AppointmentCalendar extends StatelessWidget {
 
                   context.read<ManageSchedulesBloc>().add(
                     const LoadSchedules(),
+                  );
+                  context.read<AppointmentBloc>().add(
+                    const GetAppointmentsEvent(),
                   );
 
                   final code = booked.appointmentCode;

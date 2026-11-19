@@ -28,7 +28,8 @@
             "program": "lib/main.dart",
             "flutterMode": "release",
             "args": [
-                "--dart-define=ENV=production"
+                "--dart-define=ENV=production",
+                "--dart-define=API_BASE_URL=https://mcc-queue-appointment-be.onrender.com/api/"
             ]
         }
     ]

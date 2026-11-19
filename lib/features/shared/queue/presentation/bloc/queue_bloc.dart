@@ -276,9 +276,9 @@ class QueueBloc extends Bloc<QueueEvent, QueueState> {
 
   void _startPolling() {
     _pollTimer?.cancel();
-    // shortcut: 5-second polling; switch to websocket/SSE push when available.
+    // shortcut: 10-second polling; switch to websocket/SSE push when available.
     _pollTimer = Timer.periodic(
-      const Duration(seconds: 5),
+      const Duration(seconds: 10),
       (_) => add(const QueueRefreshed()),
     );
   }
